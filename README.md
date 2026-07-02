@@ -1,18 +1,46 @@
 # Qnx Hypervisor
 
+This is built on top of the [qnx hypervisor tutorial](https://gitlab.com/qnx/hypervisor/getting-started)
+
 ## How to build
 
-- clone this repo in the images dir of qnx bsp and run "make" inside the rpi bsp dir
+- clone this repo inside the rpi bsp dir
 
 ```bash
-
+# u should be in rpi bsp dir
+# remove the images dir if it exists
+rm -rf images
+# clone the repo
+git clone https://github.com/PM-Maestro-ITI-GP-Org/Qnx_Hypervisor_rbye images
 ```
 
+- add the guests
+- then make
 
+```bash
+make
+```
 
-## How to run
+## How to connect
 
-- clone this repo, add the guests and "make"
+connect using the serial console using the following command
+
+```bash
+picocom -b 115200 /dev/ttyUSB0
+```
+
+> the default ip of the qnx host is 192.168.2.2
+
+to use ssh connect to the qnx host using the following command
+
+> there is an issue with the ssh conf rn so u can connect using:
+
+- user: `qnxuser`
+- password: `qnxuser`
+
+then use `su` to switch to root and use the password `root` (ty gemy <3).
+
+> hopfully this will be fixed in the future.
 
 ## How to get the network to work
 
@@ -69,7 +97,10 @@ sudo iptables -A FORWARD -i wlp0s20f3 -o enp7s0 -m state --state RELATED,ESTABLI
 
 ### To make the qnx host route to the pc
 
+> most of this will be automatically done in the build file, this is just a reference for the future.
+
 - tell the host to route the traffic to the pc
+
 
 ```bash
 route add default 192.168.2.1
@@ -93,5 +124,6 @@ pass out on bridge0
 - and add the route to the guests
 
 ```bash
+# IN GUESTS
 route add default 10.0.0.1 # use the ip of the qnx host
 ```
