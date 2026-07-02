@@ -2,7 +2,7 @@
 # to run such a guest.
 
 
-system qnx-guest-1
+system qnx-guest
 
 ram 0x80000000,512M
 
@@ -15,7 +15,7 @@ cpu
 
 # This IFS is found in the images/ folder of the guest BSP.
 # Here, qvm will look for this IFS in your current working folder.
-load qnx800-guest-1.ifs
+load qnx800-guest.ifs
 
 
 ################
@@ -54,11 +54,10 @@ vdev shmem
         loc 0x1c050000 intr
         gic:38
 
-#An example network device that connects to a 2nd guest with system name 'qnx-guest-2'
 vdev virtio-net
         loc 0x20040000
         intr gic:43
-        peer /dev/qvm/qnx-guest-2/guest_to_guest
+        peer /dev/qvm/linux-guest/guest_to_guest
         #Refer to documentation to choose an appropriate value here
         peerfeats 0x00000000 # E.g. Turn on all allowed virtio feature bits
 	#Name required for virtio-net

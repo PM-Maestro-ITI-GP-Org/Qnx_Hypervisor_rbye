@@ -35,6 +35,6 @@ vdev virtio-net
         loc 0x20040000
         intr gic:43
         mac 52:54:00:00:02:02
-        peer /dev/qvm/qnx-guest-1/guest_to_guest
+        peer /dev/qvm/qnx-guest/guest_to_guest
         peerfeats 0x0
         name guest_to_guest
