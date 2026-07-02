@@ -102,13 +102,11 @@
     ############################################################################################
     #display_msg "Starting DHCP client ..."
     #dhcpcd -bqq bridge0
-    BRIDGE_IP=192.168.2.2
-    GATEWAY_IP=192.168.2.1
-    display_msg "machine bridge ip is $BRIDGE_IP"
-    display_msg "using $GATEWAY_IP as gateway"
+    display_msg "machine bridge ip is 192.168.2.2"
+    display_msg "using 192.168.2.1 as gateway"
     display_msg "----> make sure to gateway is configured to route traffic to the outside world"
     
-    ifconfig bridge0 $BRIDGE_IP netmask 255.255.255.0
+    ifconfig bridge0 192.168.2.2 netmask 255.255.255.0
     ifconfig bridge0 -txcsum -txcsum6 -tso6 -tso4
 
     # enable routing
@@ -117,7 +115,7 @@
     pfctl -f /etc/pf.conf
     pfctl -e
 
-    route add default $GATEWAY_IP
+    route add default 192.168.2.1
 
 
     ############################################################################################
