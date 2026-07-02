@@ -1,0 +1,8 @@
+arm_64bit=1
+cmdline=startup.txt
+device_tree=bcm2711-rpi-4-b.dtb
+enable_uart=1
+force_turbo=1
+kernel=ifs-rpi4-hyp.bin
+
+max_framebuffers=2

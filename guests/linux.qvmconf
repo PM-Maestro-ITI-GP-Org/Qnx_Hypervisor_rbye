@@ -1,0 +1,40 @@
+system linux-guest
+
+ram 0x80000000,512M
+
+cpu
+
+load image.bin
+
+cmdline "console=ttyAMA0,115200 earlycon=pl011,mmio32,0x1c090000 root=/dev/vda rw rootwait systemd.unit=multi-user.target ignore_loglevel loglevel=8"
+
+vdev gic
+        version 2
+
+vdev pl011
+        hostdev -
+        loc 0x1c090000
+        intr gic:37
+
+vdev virtio-blk
+        loc 0x1c0d0000
+        intr gic:41
+        hostdev fs.img
+        name rootfs
+        
+        
+vdev virtio-net
+        loc 0x1c0c0000
+        intr gic:40
+        mac 52:54:00:00:01:02
+        peer /dev/vdevpeers/vp1
+        peerfeats 0x000019c3
+        name guest_to_host
+        
+vdev virtio-net
+        loc 0x20040000
+        intr gic:43
+        mac 52:54:00:00:02:02
+        peer /dev/qvm/qnx-guest-1/guest_to_guest
+        peerfeats 0x0
+        name guest_to_guest
