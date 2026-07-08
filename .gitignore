@@ -1,6 +1,9 @@
 # add what u want to ignore here
 
-
+src/someip/commonapi-qnx/build-rpi/
+src/someip/commonapi-qnx/third_party/
+src/someip/commonapi_client_server/client/build/
+src/someip/commonapi_client_server/server/build/
 
 # ignore the build output
 qnx_host/images/ifs-rpi4.bin
