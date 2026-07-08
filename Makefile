@@ -1,3 +1,7 @@
+ifndef QNX_SDP_PATH
+$(error QNX_SDP_PATH is not set. Please source qnxsdp-env.sh first)
+endif
+
 SUBDIRS := qnx_host qnx_guests
 
 .PHONY: all clean $(SUBDIRS) qnx_install
