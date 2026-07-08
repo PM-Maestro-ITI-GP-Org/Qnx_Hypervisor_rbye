@@ -26,3 +26,5 @@ qnx_guests/src/hardware/startup/boards/
 *.a
 *.pinfo
 *.def
+*.ifs
+*.sym
