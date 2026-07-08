@@ -1,5 +1,13 @@
 ifndef QNX_SDP_PATH
-$(error QNX_SDP_PATH is not set. Please source qnxsdp-env.sh first)
+ifneq ($(strip $(QNX_HOST)),)
+ifneq ($(findstring /host/linux/x86_64,$(QNX_HOST)),)
+QNX_SDP_PATH := $(patsubst %/host/linux/x86_64,%,$(QNX_HOST))
+else
+$(error QNX_HOST is set but does not contain the expected /host/linux/x86_64 suffix)
+endif
+else
+$(error QNX_SDP_PATH is not set and QNX_HOST is not set. Please source qnxsdp-env.sh first or set QNX_HOST)
+endif
 endif
 
 SUBDIRS := qnx_host qnx_guests src
