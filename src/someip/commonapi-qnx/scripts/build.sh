@@ -30,6 +30,17 @@ THIRD_PARTY="${THIRD_PARTY_DIR}"
 mkdir -p "${OUTPUT_DIR}"
 BUILD="$(cd "${OUTPUT_DIR}" && pwd)"
 INTERFACE="${INTERFACE_DIR}"
+BUILD_COMPLETE_MARKER="${BUILD}/.commonapi-qnx-build-complete"
+
+if [ "${FORCE_REBUILD:-0}" != "1" ] \
+    && [ -f "${BUILD_COMPLETE_MARKER}" ] \
+    && [ -f "${BUILD}/toolchain.cmake" ] \
+    && [ -d "${BUILD}/generators/core" ] \
+    && [ -d "${BUILD}/generators/someip" ] \
+    && find "${BUILD}/lib" -maxdepth 1 -name '*.so' 2>/dev/null | grep -q .; then
+    echo "Build already complete; skipping. (Set FORCE_REBUILD=1 to rebuild.)"
+    exit 0
+fi
 
 # ── source paths derived from version macros ──────────────────────────────
 BOOST_SRC="${THIRD_PARTY}/${BOOST_DIRNAME}"
@@ -292,6 +303,8 @@ echo
 echo "  Toolchain:    ${BUILD}/toolchain.cmake"
 echo "  Generators:   ${BUILD}/generators/"
 echo
+
+touch "${BUILD_COMPLETE_MARKER}"
 echo "  To build the server app:"
 echo "    source scripts/env.sh"
 echo "    cd server && cmake -B build -S . && cmake --build build"
