@@ -664,6 +664,8 @@ if [ -e /scripts/board_startup.sh ]; then
     echo "Starting board customize script ..."
     ksh /scripts/board_startup.sh
 fi
+
+screen -c /usr/share/screen/graphics-virtual-display.conf
 }
 
 
@@ -751,6 +753,50 @@ io 32 0x1C0F0008 0
 ################################################################################################
 ## END OF BUILD SCRIPT
 ################################################################################################
-# HelloWorldClient = ./HelloWorldClient
-# vsomeip_client.json = ./vsomeip_client.json
-# lib/ = ./lib/
+HelloWorldClient = ./HelloWorldClient
+vsomeip_client.json = ./vsomeip_client.json
+lib/ = ./lib/
+
+
+# Graphics driver files
+
+/usr/lib/libdrm.so.1=libdrm.so.1
+/usr/lib/libgbm.so.1=libgbm.so.1
+/sbin/drm-rpi4=drm-rpi4
+
+/usr/lib/graphics/rpi4-drm/libEGL-mesa.so=graphics/rpi4-drm/libEGL-mesa.so
+/usr/lib/graphics/rpi4-drm/libGLESv2-mesa.so=graphics/rpi4-drm/libGLESv2-mesa.so
+/usr/lib/graphics/rpi4-drm/broadcom_icd.json=graphics/rpi4-drm/broadcom_icd.json
+/usr/lib/graphics/rpi4-drm/gpu_drm-rpi4.so=graphics/rpi4-drm/gpu_drm-rpi4.so
+/usr/lib/graphics/rpi4-drm/graphics-rpi4.conf=graphics/rpi4-drm/graphics-rpi4.conf
+/usr/lib/graphics/rpi4-drm/graphics-rpi4-atomic.conf=graphics/rpi4-drm/graphics-rpi4-atomic.conf
+/usr/lib/graphics/rpi4-drm/libWFDrpi4-drm.so=graphics/rpi4-drm/libWFDrpi4-drm.so
+/usr/lib/graphics/rpi4-drm/libWFDrpi4-drm-atomic.so=graphics/rpi4-drm/libWFDrpi4-drm-atomic.so
+/usr/lib/graphics/rpi4-drm/libwfdcfg-rpi4-generic.so=graphics/rpi4-drm/libwfdcfg-rpi4-generic.so
+/usr/lib/graphics/rpi4-drm/v3d_dri.so=graphics/rpi4-drm/v3d_dri.so
+/usr/lib/dri_gbm.so=dri_gbm.so
+/usr/lib/graphics/rpi4-drm/libvulkan_broadcom.so=graphics/rpi4-drm/libvulkan_broadcom.so
+/lib/dll/screen-gles2blt.so=screen-gles2blt.so
+/lib/dll/screen-rpi4drm.so=screen-rpi4drm.so
+/usr/lib/graphics/rpi4-drm/libglapi-mesa.so=graphics/rpi4-drm/libglapi-mesa.so
+/usr/lib/libEGL.so.1=libEGL.so.1
+/usr/lib/libGLESv2.so.1=libGLESv2.so.1
+/usr/lib/libWFD.so.1=libWFD.so.1
+/usr/lib/libscrmem.so.1=libscrmem.so.1
+/usr/lib/libmemobj.so.1=libmemobj.so.1
+/usr/lib/libscreen.so.1=libscreen.so.1
+
+/bin/screen=screen
+/usr/bin/gles2-gears=gles2-gears
+
+# usr/share/screen/graphics-virtual-display.conf=/usr/share/screen/graphics-virtual-display.conf
+# usr/share/screen/graphics-headless.conf=/usr/share/screen/graphics-headless.conf
+
+fb_guest=./fb_guest
+fb_test=./fb_test
+
+/usr/share/screen/graphics-virtual-display.conf=./graphics-virtual-display.conf
+/usr/share/screen/graphics-headless.conf=./graphics-headless.conf
+/usr/share/screen/screen-stdbuf.so=dll/screen-stdbuf.so
+/usr/share/screen/screen-sw.so=dll/screen-sw.so
+/usr/lib/libswblit.so=libswblit.so
