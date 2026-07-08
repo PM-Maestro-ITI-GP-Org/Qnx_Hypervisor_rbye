@@ -753,9 +753,9 @@ io 32 0x1C0F0008 0
 ################################################################################################
 ## END OF BUILD SCRIPT
 ################################################################################################
-HelloWorldClient = ./HelloWorldClient
-vsomeip_client.json = ./vsomeip_client.json
-lib/ = ./lib/
+HelloWorldClient =../../../src/someip/commonapi_client_server/client/build/HelloWorldClient
+vsomeip_client.json =../../../src/someip/commonapi_client_server/client/vsomeip_client_mc.json
+lib/ =../../../src/someip/commonapi-qnx/build-rpi/lib
 
 
 # Graphics driver files
@@ -792,11 +792,11 @@ lib/ = ./lib/
 # usr/share/screen/graphics-virtual-display.conf=/usr/share/screen/graphics-virtual-display.conf
 # usr/share/screen/graphics-headless.conf=/usr/share/screen/graphics-headless.conf
 
-fb_guest=./fb_guest
-fb_test=./fb_test
+fb_guest=../../../src/frame_router/build/fb_guest
+fb_test=../../../src/frame_router/build/fb_test
 
-/usr/share/screen/graphics-virtual-display.conf=./graphics-virtual-display.conf
-/usr/share/screen/graphics-headless.conf=./graphics-headless.conf
+/usr/share/screen/graphics-virtual-display.conf=../../../conf/display/graphics-virtual-display.conf
+/usr/share/screen/graphics-headless.conf=../../../conf/display/graphics-headless.conf
 /usr/share/screen/screen-stdbuf.so=dll/screen-stdbuf.so
 /usr/share/screen/screen-sw.so=dll/screen-sw.so
 /usr/lib/libswblit.so=libswblit.so

@@ -749,6 +749,6 @@ io 32 0x1C0F0008 0
 ################################################################################################
 ## END OF BUILD SCRIPT
 ################################################################################################
-HelloWorldService = ./HelloWorldService
-vsomeip_server.json = ./vsomeip_server_mc.json
-lib/ = ./lib/
+HelloWorldService =../../../src/someip/commonapi_client_server/server/build/HelloWorldService
+vsomeip_server.json =../../../src/someip/commonapi_client_server/server/vsomeip_server_mc.json
+lib/ =../../../src/someip/commonapi-qnx/build-rpi/lib

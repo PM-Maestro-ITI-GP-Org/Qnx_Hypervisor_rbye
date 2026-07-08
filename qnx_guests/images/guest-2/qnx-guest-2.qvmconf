@@ -15,7 +15,7 @@ cpu
 
 # This IFS is found in the images/ folder of the guest BSP.
 # Here, qvm will look for this IFS in your current working folder.
-load qnx800-guest-2.ifs
+load qnx-guest.ifs
 
 
 ################

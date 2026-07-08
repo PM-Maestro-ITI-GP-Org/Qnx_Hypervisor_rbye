@@ -45,4 +45,10 @@ mount -tdos /dev/sd0t12 /dos
     Subsystem       sftp    /usr/libexec/sftp-server
     }
 
-[-followlink] /guests/ = ./guests/
+# copy the guests
+/guests/guest-1/qnx-guest.ifs = ../../qnx_guests/images/guest-1/qnx800-guest-1.ifs
+/guests/guest-1/qnx-guest-1.qvmconf = ../../qnx_guests/images/guest-1/qnx-guest-1.qvmconf
+
+/guests/guest-2/qnx-guest.ifs = ../../qnx_guests/images/guest-2/qnx800-guest-2.ifs
+/guests/guest-2/qnx-guest-2.qvmconf = ../../qnx_guests/images/guest-2/qnx-guest-2.qvmconf
+
