@@ -51,8 +51,11 @@ vdev virtio-console
 
 # Shared memory virtual device
 vdev shmem
-        loc 0x1c050000 intr
-        gic:38
+        loc 0x1c050000
+        intr gic:38
+        create fb_shared,0x400000
+        allow fb_shared
+
 
 vdev virtio-net
         loc 0x20040000
@@ -63,19 +66,7 @@ vdev virtio-net
 	#Name required for virtio-net
         name guest_to_guest
 
-#An example network device that connects to the host.
-# To have more than 1 guest with networking
-# you need to create additional vdevpeer devices
-#vdev virtio-net
-#        loc 0x1c0c0000
-#        intr gic:40
-#        peer /dev/vdevpeers/vp0
-#        #Refer to documentation to choose an appropriate value here
-#        peerfeats 0x00000000 # E.g. Turn on all allowed virtio feature bits 
-#	#Name required for virtio-net
-#        name guest_to_host
-# use  0x000019c3 in peerfeats if u have an error
-        
+# use  0x000019c3 in peerfeats if u have an error   
 vdev virtio-net
     loc 0x1c0c0000
     intr gic:40
@@ -97,7 +88,4 @@ vdev virtio-blk
 #An example SP805 watchdog (to use see /scripts/watchdog-start.sh in guest)
 vdev wdt-sp805
         loc 0x1c0f0000
-
-# Guest SMMU
-vdev smmu
 
