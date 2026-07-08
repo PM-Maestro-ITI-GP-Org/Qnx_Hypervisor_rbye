@@ -101,7 +101,6 @@ sudo iptables -A FORWARD -i wlp0s20f3 -o enp7s0 -m state --state RELATED,ESTABLI
 
 - tell the host to route the traffic to the pc
 
-
 ```bash
 route add default 192.168.2.1
 ```
@@ -119,6 +118,13 @@ nat on bridge0 from 10.0.0.0/24 to any -> (bridge0)
 pass in on vp0 # vp0 or vp1 (depennding on the guest)
 # pass in on vp1 # if ur usign vp1 (for linux)
 pass out on bridge0
+```
+
+- enable the pf firewall
+
+```bash
+pfctl -f /etc/pf.conf
+pfctl -e
 ```
 
 - and add the route to the guests
