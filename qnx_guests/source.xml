@@ -1,0 +1,25 @@
+<!-- Unless otherwise specified, values/attributes are free-form strings -->
+    <!-- type is currently either BSP or SourceOnly -->
+<sourcePackage type="BSP" id="hypervisor-guest-arm">
+    <title>Hypervisor guest for generic ARM virtual machines</title>
+    <release>0.2.0</release>
+    <property key="f.subsystem">Virtualization Extensions</property>
+    <property key="com.qnx.category">Hypervisor</property>
+    <maturity>Development Build</maturity>
+    <license>QDL and Apache II</license>
+    <startup>startup-armv8_fm</startup>
+    <requires>package: com.qnx.${baselineId}.target.microkernel.core (>= 2.0.2)</requires>
+    <!-- Virtio Drivers -->
+    <requires>package: com.qnx.${baselineId}.target.driver.virtio.devb</requires>
+    <requires>package: com.qnx.${baselineId}.target.driver.virtio.devc</requires>
+    <requires>package: com.qnx.${baselineId}.target.driver.virtio.startup</requires>
+    <!-- Virtio Ethernet Driver -->
+    <requires>package: com.qnx.${baselineId}.target.net.devsvirtio</requires>
+    <!-- FDT PCI HW module -->
+    <requires>package: com.qnx.${baselineId}.target.pci.hw.fdt</requires>
+    <requires>package: com.qnx.${baselineId}.target.net.openSSH (>= 0.1.0)</requires>
+    <description>Supporting binaries and configurations for running guests within ARM-based virtual machines.</description>
+    <qnxTargetVersion>SDP8.0</qnxTargetVersion>
+    <!-- Hypervisor BSPs can run on a number of different target CPUs -->
+    <qnxTargetCPU variant="*"></qnxTargetCPU>
+</sourcePackage>

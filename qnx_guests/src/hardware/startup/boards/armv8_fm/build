@@ -1,0 +1,80 @@
+[+keeplinked]
+[image=0x80000000]
+[virtual=aarch64le,elf] .bootstrap = {
+	#
+	# board_smp.c requires -Px to specify how many processors are present.
+	# This should be <= number of processors configured in the model.
+	# eg. Foundation_v8 --cores=2 --image <image_ifs>
+	#
+	startup-armv8_fm -vv -P2
+
+	PATH=/proc/boot LD_LIBRARY_PATH=/proc/boot procnto-smp-instr -vv
+}
+
+[+script] .script = {
+	display_msg Welcome to QNX 7.0.0 on the ARMv8 Foundation Model
+
+	procmgr_symlink ../../proc/boot/ldqnx-64.so.2 /usr/lib/ldqnx-64.so.2
+
+	devc-serpl011 -F -e 0x1c090000,37 &
+	reopen /dev/ser1
+
+	[+session] ksh &
+}
+
+#
+# Shared libraries
+#
+libc.so
+libgcc_s.so.1
+ldqnx-64.so.2
+libregex.so
+libqh.so
+libm.so
+libslog2.so
+libslog2parse.so
+libslog2shim.so
+libtracelog.so
+
+# Block device support
+libcam.so
+io-blk.so
+cam-disk.so
+fs-qnx6.so
+fs-dos.so
+libncursesw.so.1
+
+# Network support
+libsocket.so
+devnp-virtio.so
+
+
+#libsecpol.so is only required in some cases, do not fail mkifs if not found
+[+optional]libsecpol.so
+
+
+# generic utilities
+devc-serpl011
+ksh
+uname
+pidin
+stty
+date
+ls
+shutdown
+
+# Network support
+io-pkt-v6-hc
+nicinfo
+ping
+ftp
+fs-nfs3
+ifconfig
+dhclient
+if_up
+inetd
+telnet
+
+devb-virtio
+
+devc-serpl011
