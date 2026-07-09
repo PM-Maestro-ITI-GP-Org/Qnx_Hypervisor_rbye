@@ -103,3 +103,5 @@ pass
 # WARNING: Do NOT touch pins used by host system (UART 14,15; SD; I2C 2,3)
 pass
         loc mem:0xfe200000,0x1000,rwn
+
+vdev smmu

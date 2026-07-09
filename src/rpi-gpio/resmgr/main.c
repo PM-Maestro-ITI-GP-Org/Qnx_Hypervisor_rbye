@@ -535,7 +535,13 @@ static int get_rpi_version(void)
     }
 
     struct utsname utsname;
-    if (uname(&utsname)) {
+    const char *forced = getenv("RPI_GPIO_FORCE_MODEL");
+    fprintf(stdout, "DEBUG: forced=%s\n", forced ? forced : "(null)");
+    if (forced) {
+        fprintf(stdout, "Overriding platform detection via RPI_GPIO_FORCE_MODEL=%s\n", forced);
+        strncpy(utsname.machine, forced, sizeof(utsname.machine) - 1);
+        utsname.machine[sizeof(utsname.machine) - 1] = '\0';
+    } else if (uname(&utsname)) {
         fprintf(stderr, "Unable to query uname. Err=%s\n", strerror(errno));
         return -1;
     }
