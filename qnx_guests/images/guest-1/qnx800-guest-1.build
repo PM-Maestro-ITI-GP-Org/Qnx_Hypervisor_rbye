@@ -68,6 +68,12 @@
     display_msg "Starting SPI master driver ..."
     spi-bcm2711
     waitfor /dev/io-spi
+    
+    ############################################################################################
+    ## GPIO resourse manager (server)
+    ############################################################################################
+    rpio_gpio &
+    waitfor /dev/gpio
 
     ############################################################################################
     ## Network driver
@@ -759,6 +765,16 @@ io 32 0x1C0F0008 0
 ## SPI driver (pass-through device)
 ################################################################################################
 /sbin/spi-bcm2711=spi-bcm2711
+
+
+
+################################################################################################
+## GPIO driver (pass-through device)
+################################################################################################
+# this process is just cli command that direct access the hw
+/sbin/gpio-bcm2711=gpio-bcm2711
+# this is the resource manager which visualize the /dev/gpio to access the gpio pins using files instead of msg passing (server)
+/sbin/rpi-gpio=../../../src/rpi-gpio/build/resmgr/rpi_gpio
 
 /etc/system/config/spi/spi.conf = {
 # SPI0 pass-through: identity-mapped at 0xfe204000 (no IOMMU on RPi4)
