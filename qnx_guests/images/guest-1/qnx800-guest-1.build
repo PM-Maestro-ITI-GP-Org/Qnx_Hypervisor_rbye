@@ -62,6 +62,12 @@
     /proc/boot/.storage-server.sh
 
 
+    ############################################################################################
+    ## SPI master driver (pass-through device at guest 0x1c200000, IRQ 44)
+    ############################################################################################
+    display_msg "Starting SPI master driver ..."
+    spi-bcm2711
+    waitfor /dev/io-spi
 
     ############################################################################################
     ## Network driver
@@ -749,6 +755,39 @@ io 32 0x1C0F0008 0
 }
 
 
+################################################################################################
+## SPI driver (pass-through device)
+################################################################################################
+/sbin/spi-bcm2711=spi-bcm2711
+
+/etc/system/config/spi/spi.conf = {
+# SPI0 pass-through: identity-mapped at 0xfe204000 (no IOMMU on RPi4)
+# No DMA options -> PIO mode only to avoid smmuman requirement
+[globals]
+verbose=5
+
+[bus]
+busno=0
+name=spi0
+base=0xfe204000
+irq=44
+input_clock=500000000
+# Set DMA threshold > 0 to force PIO mode; uint8_t field, max=255
+# (dma_thld must fit in uint8_t, so 65536 wraps to 0 -> DMA always!)
+dma_thld=255
+
+[dev]
+parent_busno=0
+devno=0
+name=dev0
+clock_rate=5000000
+cpha=0
+cpol=0
+bit_order=msb
+word_width=8
+}
+
+
 
 ################################################################################################
 ## END OF BUILD SCRIPT
@@ -800,3 +839,9 @@ fb_test=../../../src/frame_router/build/fb_test
 /usr/share/screen/screen-stdbuf.so=dll/screen-stdbuf.so
 /usr/share/screen/screen-sw.so=dll/screen-sw.so
 /usr/lib/libswblit.so=libswblit.so
+
+
+########################################################################
+######################### spi application ##############################
+spi_loopback=../../../src/spi_loopback/spi_loopback
+########################################################################

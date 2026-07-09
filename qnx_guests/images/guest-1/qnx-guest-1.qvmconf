@@ -89,3 +89,12 @@ vdev virtio-blk
 vdev wdt-sp805
         loc 0x1c0f0000
 
+
+# SPI0 pass-through from host (host phys: 0xfe204000, host IRQ: 150)
+# On RPi4 there is no SMMU/IOMMU, so guest addr MUST equal host addr
+# so that any DMA accesses match host-physical addresses directly.
+# NOTE: host must stop its spi-bcm2711 driver before starting this guest
+pass
+        loc mem:0xfe204000,0x1000,rwn
+        intr gic:44=150
+
