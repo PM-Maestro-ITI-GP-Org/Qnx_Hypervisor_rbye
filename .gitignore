@@ -28,3 +28,4 @@ qnx_guests/src/hardware/startup/boards/
 *.def
 *.ifs
 *.sym
+src/spi_loopback/spi_loopback

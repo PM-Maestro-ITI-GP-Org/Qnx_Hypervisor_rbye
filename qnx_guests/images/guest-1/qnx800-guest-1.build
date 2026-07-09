@@ -844,4 +844,6 @@ fb_test=../../../src/frame_router/build/fb_test
 ########################################################################
 ######################### spi application ##############################
 spi_loopback=../../../src/spi_loopback/spi_loopback
+motor_controller=../../../src/giga_spi/motor_controller
+config.json=../../../src/giga_spi/config.json
 ########################################################################
