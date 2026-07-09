@@ -2,15 +2,10 @@
 
 all:
 	@set -e; \
-	$(MAKE) -C spi_loopback; \
 	for dir in */; do \
 		if [ -f "$$dir/Makefile" ] || [ -f "$$dir/GNUmakefile" ]; then \
-			case "$$dir" in \
-				./frame_router/ | ./someip/ | ./someip/commonapi_client_server/ | ./someip/commonapi-qnx/) \
-					echo "==> Building $$dir"; \
-					$(MAKE) -C "$$dir"; \
-					;; \
-				esac; \
+			echo "==> Building $$dir"; \
+			$(MAKE) -C "$$dir"; \
 		fi; \
 	done
 
