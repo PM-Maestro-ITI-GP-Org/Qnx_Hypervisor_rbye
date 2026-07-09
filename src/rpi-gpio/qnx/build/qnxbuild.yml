@@ -1,0 +1,3 @@
+build:
+  separate_hinstall: false
+  cmake_version: '3.25'
