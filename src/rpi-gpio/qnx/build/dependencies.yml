@@ -1,0 +1,3 @@
+packages:
+- com.qnx.{baselineId}.osr.cairo
+- com.qnx.{baselineId}.osr.cairo.dev

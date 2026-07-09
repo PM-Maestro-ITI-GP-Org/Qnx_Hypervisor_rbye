@@ -98,3 +98,8 @@ pass
         loc mem:0xfe204000,0x1000,rwn
         intr gic:44=150
 
+
+# GPIO pass-through (RPi4 GPIO at 0xfe200000, no IRQ needed - polled)
+# WARNING: Do NOT touch pins used by host system (UART 14,15; SD; I2C 2,3)
+pass
+        loc mem:0xfe200000,0x1000,rwn
