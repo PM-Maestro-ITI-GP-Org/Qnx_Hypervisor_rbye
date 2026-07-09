@@ -29,3 +29,4 @@ qnx_guests/src/hardware/startup/boards/
 *.ifs
 *.sym
 src/spi_loopback/spi_loopback
+src/rpi-gpio/build
