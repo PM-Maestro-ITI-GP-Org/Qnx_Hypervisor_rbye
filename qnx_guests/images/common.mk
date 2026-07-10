@@ -11,13 +11,13 @@ HOST_MKIFS := mkifs
 .PHONY: all clean
 
 
-all: $(BOARD).ifs
+all: $(F_NAME).ifs
 
 clean:
 	$(RM_HOST) *.ifs *.sym
 
-$(BOARD).ifs: $(BOARD).build
-	$(HOST_MKIFS) -a$(BOARD) -r$(INSTALL) -v $(MKIFSFLAGS) $^ $@
+$(F_NAME).ifs: $(F_NAME).build
+	$(HOST_MKIFS) -a$(F_NAME) -r$(INSTALL) -v $(MKIFSFLAGS) $^ $@
 
 -include $(BUILD_TEMPLATE)/template.mk
 

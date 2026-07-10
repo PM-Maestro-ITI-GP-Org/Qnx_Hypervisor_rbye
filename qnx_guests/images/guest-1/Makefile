@@ -1,2 +1,2 @@
-BOARD=qnx800-guest-1
+F_NAME=qnx800-guest-1
 include ../common.mk
