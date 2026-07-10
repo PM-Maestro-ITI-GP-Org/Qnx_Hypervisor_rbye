@@ -7,7 +7,6 @@ src/someip/commonapi_client_server/client/build/
 src/someip/commonapi_client_server/server/build/
 
 # ignore host build output directories
-qnx_host/images/
 qnx_host/install/
 qnx_host/src/hardware/devb/sdmmc/aarch64/bcm2711.le/
 qnx_host/src/hardware/devc/serminiuart/aarch64/le/
@@ -27,6 +26,8 @@ qnx_guests/src/hardware/startup/boards/
 *.pinfo
 *.def
 *.ifs
+*.img
+*.bin
 *.sym
 src/spi_loopback/spi_loopback
 src/rpi-gpio/build
