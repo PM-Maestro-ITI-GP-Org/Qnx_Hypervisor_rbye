@@ -5,7 +5,7 @@
 config.txt = {
 arm_64bit=1
 cmdline=cmdline.txt
-device_tree=bcm2712-rpi-5.dtb
+device_tree=bcm2711-rpi-4-b.dtb
 max_framebuffers=2
 enable_uart=1
 kernel=qnx_sdp.ifs
@@ -15,8 +15,8 @@ cmdline.txt = {
 verbose root=/dev/sd0t179 rootfstype=qnx6fs
 }
 
-qnx_sdp.ifs=ifs-rpi5-hyp.bin
-bcm2712-rpi-5.dtb=bcm2712-rpi-5.dtb
+qnx_sdp.ifs=ifs-rpi4-hyp.bin
+bcm2711-rpi-4-b.dtb=bcm2711-rpi-4-b.dtb
 start4.elf=start4.elf
 fixup4.dat=fixup4.dat
 overlays=overlays

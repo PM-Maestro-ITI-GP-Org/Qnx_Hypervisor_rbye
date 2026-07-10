@@ -73,7 +73,7 @@
     ## GPIO resourse manager (server)
     ############################################################################################
     
-    RPI_GPIO_FORCE_MODEL=RaspberryPi4B rpi-gpio &
+    RPI_GPIO_FORCE_MODEL=RaspberryPi5 rpi-gpio &
     waitfor /dev/gpio
 
     ############################################################################################

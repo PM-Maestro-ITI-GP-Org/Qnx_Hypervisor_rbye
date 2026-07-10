@@ -7,7 +7,7 @@ include $(QCONFIG)
 HOST_MKIFS := mkifs
 HOST_MKI := mki
 HOST_SED := sed
-SUFFIXES := .build .bin .raw .ui
+.SUFFIXES := .build .bin .raw .ui
 
 # NOTE: This value must match the '[image=<start_addr>]' value in the build file.
 IMAGE_LOAD_ADDR = 0x80000
@@ -43,27 +43,33 @@ all: ifs-$(BOARD)-hyp.bin disk.img
 	
 # Hypervisor (Hyp) Image Target
 ifs-$(BOARD)-hyp.bin: $(BOARD)-hypervisor.build
+	@echo "Creating image: $@ from build file: $<"
 	$(HOST_MKIFS) -v -r$(INSTALL) $(MKIFSFLAGS) $^ $@
 
 clean:
+	@echo "Cleaning generated files for $(BOARD)"
 	$(RM_HOST) ifs-$(BOARD).* *.sym
 	$(RM_HOST) ifs-$(BOARD)-hyp.* *.sym
 	$(RM_HOST) disk.img part_qnx_data.img part_dos_boot.img
 
 # If the hypervisor boot image variant exists, it will be included in the
 # disk image below.
-part_dos_boot.img: part_dos_boot.build ifs-$(BOARD)-hyp.bin
+part_dos_boot.img: $(BOARD)-part_dos_boot.build ifs-$(BOARD)-hyp.bin
+	@echo "Creating DOS boot image: $@ from prerequisites: $^"
 	# Create the DOS partition image for UEFI boot mode
-	mkfatfsimg  -vv $< $@
+	mkfatfsimg -vv $< $@
 
 part_qnx_data.img: part_qnx_data.build
+	@echo "Creating QNX data image: $@ from prerequisite: $<"
 	# Create the QNX6 partition image for data storage
 	mkqnx6fsimg -vv $< $@
 
 disk_image: disk.img
 disk.img: disk.cfg part_qnx_data.img part_dos_boot.img
+	@echo "Creating disk image: $@ from prerequisites: $^"
 	# Create the boot disk image
 	# diskimage -o $@ -c $< -s 131072
 	diskimage -o $@ -c $<
+	echo "Disk image created for $(BOARD): $@"
 
 -include $(BUILD_TEMPLATE)/template.mk

@@ -8,8 +8,8 @@
 [+keeplinked]
 [image=0x80000]
 [virtual=aarch64le,raw -compress] boot = {
-    startup-bcm2712-rpi5 -v -D miniuart -W 2500 -u reg -r 0,4096,1 -Q enable,el1-host
-    PATH=/proc/boot:/sbin:/bin:/usr/bin:/usr/sbin:/usr/libexec LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib:/lib/dll:/lib/dll/pci:/usr/lib/graphics/rpi4-drm procnto-smp-instr -v
+    startup-bcm2712-rpi5 -v -u reg -a -W 5000 -Q enable,el1-host
+    PATH=/proc/boot:/sbin:/bin:/usr/bin:/usr/sbin:/usr/libexec LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib:/lib/dll:/lib/dll/pci procnto-smp-instr -v
 }
 
 [+script] startup-script = {
@@ -44,7 +44,7 @@
     ## I2C driver
     ############################################################################################
     display_msg "Starting I2C driver ..."
-    i2c-bcm2711 -p0xfe804000 --b100000 --u1
+    i2c-dwc-rpi5 -p0x1f00074000 -c200000000 -q0xa8 --u1
 
 
     ############################################################################################
@@ -52,29 +52,32 @@
     ############################################################################################
     display_msg "Starting PCI Server ..."
     PCI_HW_MODULE=/lib/dll/pci/pci_hw-bcm2712-rpi5.so
-    PCI_BKWD_COMPAT_MODULE=/lib/dll/pci/pci_bkwd_compat.so
     PCI_SLOG_MODULE=/lib/dll/pci/pci_slog2.so
     PCI_DEBUG_MODULE=/lib/dll/pci/pci_debug2.so
 
-    pci-server --bus-scan-limit=1 -c &
+    pci-server --bus-scan-limit=3 -c &
     waitfor /dev/pci
 
+    # use msix-rp1 to setup RP1 USB, ethernet, UART2, UART4, I2C, SPI IRQs
+    sleep 1
+    msix-rp1 -i 6,8,19,31,36,43,45 &
+
 
     #######################################################################
-    ## Console SERIAL driver
+    ## Debug console serial driver
     #######################################################################
-    display_msg "Starting serial driver (/dev/ser1)"
-    devc-serminiuart -b115200 -c500000000 -e -F -u1 0xfe215000,125
-
-    #display_msg "Starting serial driver (/dev/ser3)"
-    #devc-serpl011 -b115200 -c48000000 -e -F -u3 0xfe201600,153
+    display_msg "Starting serial driver (/dev/ser10)"
+    devc-serpl011-rpi5 -b115200 -c44236800 -e -F -u10 -D 0x107d001000^2,153
 
 
     ############################################################################################
     ## SPI driver
     ############################################################################################
-    display_msg "Starting SPI master driver ..."
-    spi-bcm2711 
+    display_msg "Starting SPI driver"
+    gpio-rp1 set 7-8 a0 pu
+    gpio-rp1 set 9-11 a0 pd
+
+    spi-dwc -c /etc/system/config/spi/spi.conf
     waitfor /dev/io-spi
 
 
@@ -82,7 +85,8 @@
     ## Network driver
     ############################################################################################
     display_msg "Starting networking ..."
-    io-sock  -m phy -m fdt -m phy_fdt -d genet -m pci -d em -d ix -d re -d igc -m usb -d axe -d axge -d cdce -d smsc -m vdevpeer-net
+    gpio-rp1 set 32 op pd dh
+    io-sock -m phy -m fdt -d cgem -m pci -d em -d ix -d re -d igc -m usb -d axe -d axge -d cdce -d smsc -m vdevpeer-net
     
     ############################################################################################
     ## Hypervisor virtio-blk example devices for QNX guest BSP systems
@@ -134,27 +138,21 @@
 
     display_msg "Starting qconn daemon ..."
     qconn
-    
+        
+
     ############################################################################################
     ## Customize startup components
     ############################################################################################
-    ksh /proc/boot/customize_startup.sh
+    /proc/boot/customize_startup.sh
 
 
-    ############################################################################################
-    ## Start the main shell
-    ############################################################################################
-    reopen /dev/ser1
-    display_msg "Starting shell ..."
-    [+session] ksh &
-    
-        #######################################################################
+    #######################################################################
     ## SD memory card / eMMC driver
     ## Note: "bmstr_base" option is required for busmaster memory
     ## address translation
     #######################################################################
     display_msg "Starting SDMMC driver (/dev/sd0)"
-    devb-sdmmc-bcm2711 mem name=below1G sdio addr=0xfe340000,irq=158 disk name=sd blk &
+    sh -c "devb-sdmmc-bcm2712 sdio addr=0x1000fff000,irq=305 disk name=sd > /dev/null 2>&1" &
     waitfor /dev/sd0 3000
     waitfor /dev/sd0t179
 
@@ -166,6 +164,11 @@
     sh /proc/boot/usb_start.sh
 
 
+
+    # start the fan control driver for rpi5
+    sh /proc/boot/fan_start.sh
+
+
     ############################################################################################
     ## Storage service
     ############################################################################################
@@ -174,16 +177,25 @@
 
     ############################################################################################
     ## enable rpi 5 graphics driver // will see later
+    ## No rpi5 graphics drivers available yet
     ############################################################################################
-    display_msg "Starting graphics driver ..."
-    screen -c /usr/lib/graphics/rpi4-drm/graphics-rpi4.conf &
+    #display_msg "Starting graphics driver ..."
+    #screen -c /usr/lib/graphics/rpi4-drm/graphics-rpi4.conf &
+
+    ############################################################################################
+    ## Start the main shell
+    ############################################################################################
+    reopen /dev/ser10
+    display_msg "Starting shell ..."
+    [+session] ksh &
+    
 }
 
 ############################################################################################
 ## Script for Virtual Network driver
 ############################################################################################
 [perms=0744] .vdev_net_start.sh = {
-   #!/bin/sh
+   #!/bin/sh   
   waitfor /dev/io-sock/mods-vdevpeer-net.so
 
   ## Guest-to-host direct link — standalone IP, NOT in bridge
@@ -199,20 +211,36 @@
   
 
   ## Physical NIC — bring up for bridge (external LAN only, vp0 stays OUT)
-  if_up -p genet0
-  ifconfig genet0 up
+  if_up -p cgem0
+  ifconfig cgem0 up
   sysctl -w net.link.bridge.inherit_mac=1
-  ifconfig bridge0 create up addm genet0
+  ifconfig bridge0 create up addm cgem0
 }
 
 [uid=0 gid=0]
 
 [type=link] /bin/sh=/bin/ksh
 [type=link] /tmp=/dev/shmem
-[type=link] /dev/console=/dev/ser1
+[type=link] /dev/console=/dev/ser10
 [type=link] /var/log=/tmp
 [type=link] /usr/tmp=/tmp
 
+
+
+################################################################################################
+## fan control
+################################################################################################
+fan_start.sh = {
+#!/bin/sh
+
+echo "Starting fan control driver"
+
+# gpio 45 is congiured as PWM1_CHAN3 to drive fan
+gpio-rp1 set 45 a0 pd
+fan-rpi5
+waitfor /dev/fan
+echo 200 > /dev/fan
+}
 
 ################################################################################################
 ## WDT driver
@@ -223,8 +251,7 @@
 ################################################################################################
 ## Serial drivers
 ################################################################################################
-/sbin/devc-serminiuart=devc-serminiuart
-/sbin/devc-serpl011=devc-serpl011
+/sbin/devc-serpl011-rpi5=devc-serpl011-rpi5
 
 
 ################################################################################################
@@ -238,7 +265,7 @@
 ################################################################################################
 ## Block drivers
 ################################################################################################
-/sbin/devb-sdmmc-bcm2711=devb-sdmmc-bcm2711
+/sbin/devb-sdmmc-bcm2712=devb-sdmmc-bcm2712
 /sbin/devb-ram=devb-ram
 
 ################################################################################################
@@ -334,7 +361,7 @@ fi
 ################################################################################################
 ## Network driver files
 ################################################################################################
-/lib/dll/devs-genet.so=devs-genet.so
+/lib/dll/devs-cgem.so=devs-cgem.so
 
 /lib/dll/devs-em.so=devs-em.so
 /lib/dll/devs-ix.so=devs-ix.so
@@ -471,7 +498,7 @@ fi
 ################################################################################################
 ## USB host drivers
 ################################################################################################
-/lib/dll/devu-hcd-bcm2711-xhci.so=devu-hcd-bcm2711-xhci.so
+/lib/dll/devu-hcd-dwc3-xhci.so=devu-hcd-dwc3-xhci.so
 
 ################################################################################################
 ## USB host shared libraries
@@ -495,7 +522,7 @@ fi
 ################################################################################################
 ## I2C drivers
 ################################################################################################
-/sbin/i2c-bcm2711=i2c-bcm2711
+/sbin/i2c-dwc-rpi5=i2c-dwc-rpi5
 
 ################################################################################################
 ## I2C support
@@ -515,12 +542,25 @@ fi
 [buscfg]
 
 [runtime]
-BUS_SCAN_LIMIT=1
+BUS_SCAN_LIMIT=3
 
 [envars]
 PCI_HW_MODULE=/lib/dll/pci/pci_hw-bcm2712-rpi5.so
 PCI_DEBUG_MODULE=pci_debug2.so
 
+}
+
+[uid=0 gid=0 perms=0444] /etc/system/config/pci/pci_hw-bcm2712-rpi5.cfg = {
+######################################  S E C T I O N  #########################################
+##
+[PI5]
+##
+## Pi 5 PCIe HW module configuration
+## --------------------------------
+##
+
+## PCIe gen speed configuration for the extension port
+MAX_GEN_SPEED=3
 }
 
 ################################################################################################
@@ -573,7 +613,7 @@ PCI_DEBUG_MODULE=pci_debug2.so
 ################################################################################################
 ## SPI driver
 ################################################################################################
-/sbin/spi-bcm2711=spi-bcm2711
+/sbin/spi-dwc=spi-dwc
 
 /etc/system/config/spi/spi.conf = {
 # See spi-template.conf or SDP docs for a full description of the configuration fields.
@@ -584,48 +624,21 @@ verbose=5
 [bus]
 busno=0
 name=spi0
-base=0xfe204000
-irq=150
-input_clock=500000000
-bs=rpanic=48,tpanic=16
-dma_attach_opts=num_cbs=256,range_min=0,range_max=14,typed_mem=sysram&below1G
-dma_thld=4
+base=0x1f00050000
+irq=179
+input_clock=200000000
+bs=cs_max=1
 
 [dev]
 parent_busno=0
 devno=0
 name=dev0
-clock_rate=5000000
+clock_rate=100000000
 cpha=1
 cpol=0
 bit_order=msb
 word_width=32
 idle_insert=1
-
-[dev]
-parent_busno=0
-devno=1
-name=dev1
-cpha=0
-cpol=1
-word_width=32
-clock_rate=5000000
-
-[bus]
-busno=3
-name=spi3
-base=0xfe204600
-irq=151
-input_clock=500000000
-
-[dev]
-parent_busno=3
-devno=0
-name=dev0
-cpha=0
-cpol=1
-word_width=8
-clock_rate=5000000
 
 }
 
@@ -663,36 +676,37 @@ clock_rate=5000000
 [+optional +dupignore] /usr/bin/dvtm=dvtm
 
 #########################################################################
-# Board Specific graphics files for rpi4 target
+# Board Specific graphics files for rpi5 target
+# NOTE: rpi5-drm graphics not yet available - commented out
 #########################################################################
-/usr/lib/libdrm.so.1=libdrm.so.1
-/usr/lib/libgbm.so.1=libgbm.so.1
-/sbin/drm-rpi4=drm-rpi4
-
-/usr/lib/graphics/rpi4-drm/libEGL-mesa.so=graphics/rpi4-drm/libEGL-mesa.so
-/usr/lib/graphics/rpi4-drm/libGLESv2-mesa.so=graphics/rpi4-drm/libGLESv2-mesa.so
-/usr/lib/graphics/rpi4-drm/broadcom_icd.json=graphics/rpi4-drm/broadcom_icd.json
-/usr/lib/graphics/rpi4-drm/gpu_drm-rpi4.so=graphics/rpi4-drm/gpu_drm-rpi4.so
-/usr/lib/graphics/rpi4-drm/graphics-rpi4.conf=graphics/rpi4-drm/graphics-rpi4.conf
-/usr/lib/graphics/rpi4-drm/graphics-rpi4-atomic.conf=graphics/rpi4-drm/graphics-rpi4-atomic.conf
-/usr/lib/graphics/rpi4-drm/libWFDrpi4-drm.so=graphics/rpi4-drm/libWFDrpi4-drm.so
-/usr/lib/graphics/rpi4-drm/libWFDrpi4-drm-atomic.so=graphics/rpi4-drm/libWFDrpi4-drm-atomic.so
-/usr/lib/graphics/rpi4-drm/libwfdcfg-rpi4-generic.so=graphics/rpi4-drm/libwfdcfg-rpi4-generic.so
-/usr/lib/graphics/rpi4-drm/v3d_dri.so=graphics/rpi4-drm/v3d_dri.so
-/usr/lib/dri_gbm.so=dri_gbm.so
-/usr/lib/graphics/rpi4-drm/libvulkan_broadcom.so=graphics/rpi4-drm/libvulkan_broadcom.so
-/lib/dll/screen-gles2blt.so=screen-gles2blt.so
-/lib/dll/screen-rpi4drm.so=screen-rpi4drm.so
-/usr/lib/graphics/rpi4-drm/libglapi-mesa.so=graphics/rpi4-drm/libglapi-mesa.so
-/usr/lib/libEGL.so.1=libEGL.so.1
-/usr/lib/libGLESv2.so.1=libGLESv2.so.1
-/usr/lib/libWFD.so.1=libWFD.so.1
-/usr/lib/libscrmem.so.1=libscrmem.so.1
-/usr/lib/libmemobj.so.1=libmemobj.so.1
-/usr/lib/libscreen.so.1=libscreen.so.1
-
-/bin/screen=screen
-/usr/bin/gles2-gears=gles2-gears
+#/usr/lib/libdrm.so.1=libdrm.so.1
+#/usr/lib/libgbm.so.1=libgbm.so.1
+#/sbin/drm-rpi5=drm-rpi5
+#
+#/usr/lib/graphics/rpi5-drm/libEGL-mesa.so=graphics/rpi5-drm/libEGL-mesa.so
+#/usr/lib/graphics/rpi5-drm/libGLESv2-mesa.so=graphics/rpi5-drm/libGLESv2-mesa.so
+#/usr/lib/graphics/rpi5-drm/broadcom_icd.json=graphics/rpi5-drm/broadcom_icd.json
+#/usr/lib/graphics/rpi5-drm/gpu_drm-rpi5.so=graphics/rpi5-drm/gpu_drm-rpi5.so
+#/usr/lib/graphics/rpi5-drm/graphics-rpi5.conf=graphics/rpi5-drm/graphics-rpi5.conf
+#/usr/lib/graphics/rpi5-drm/graphics-rpi5-atomic.conf=graphics/rpi5-drm/graphics-rpi5-atomic.conf
+#/usr/lib/graphics/rpi5-drm/libWFDrpi5-drm.so=graphics/rpi5-drm/libWFDrpi5-drm.so
+#/usr/lib/graphics/rpi5-drm/libWFDrpi5-drm-atomic.so=graphics/rpi5-drm/libWFDrpi5-drm-atomic.so
+#/usr/lib/graphics/rpi5-drm/libwfdcfg-rpi6-generic.so=graphics/rpi5-drm/libwfdcfg-rpi5-generic.so
+#/usr/lib/graphics/rpi5-drm/v3d_dri.so=graphics/rpi5-drm/v3d_dri.so
+#/usr/lib/dri_gbm.so=dri_gbm.so
+#/usr/lib/graphics/rpi5-drm/libvulkan_broadcom.so=graphics/rpi5-drm/libvulkan_broadcom.so
+#/lib/dll/screen-gles2blt.so=screen-gles2blt.so
+#/lib/dll/screen-rpi5drm.so=screen-rpi5drm.so
+#/usr/lib/graphics/rpi5-drm/libglapi-mesa.so=graphics/rpi5-drm/libglapi-mesa.so
+#/usr/lib/libEGL.so.1=libEGL.so.1
+#/usr/lib/libGLESv2.so.1=libGLESv2.so.1
+#/usr/lib/libWFD.so.1=libWFD.so.1
+#/usr/lib/libscrmem.so.1=libscrmem.so.1
+#/usr/lib/libmemobj.so.1=libmemobj.so.1
+#/usr/lib/libscreen.so.1=libscreen.so.1
+#
+#/bin/screen=screen
+#/usr/bin/gles2-gears=gles2-gears
 
 ################################################################################################
 ## Human-Interface Device (HID) support
@@ -955,7 +969,7 @@ export HOME=/
 export SYSNAME=nto
 export TERM=qansi
 export PATH=/proc/boot:/sbin:/bin:/usr/bin:/usr/sbin:/usr/libexec
-export LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib:/lib/dll:/lib/dll/pci:/usr/lib/graphics/rpi4-drm
+    export LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib:/lib/dll:/lib/dll/pci
 
 export PCI_HW_MODULE=/lib/dll/pci/pci_hw-bcm2712-rpi5.so
 export PCI_DEBUG_MODULE=/lib/dll/pci/pci_debug2.so
@@ -967,7 +981,7 @@ export PCI_BKWD_COMPAT_MODULE=/lib/dll/pci/pci_bkwd_compat.so
 ################################################################################################
 ## Customize startup
 ################################################################################################
-customize_startup.sh = {
+[perms=0744] customize_startup.sh = {
 #!/bin/ksh
 
 if [ -e /scripts/board_startup.sh ]; then
@@ -983,27 +997,36 @@ fi
 ################################################################################################
 usb_start.sh = {
 #!/bin/sh
-    VL805_VERSION=/dev/shmem/vl805_version.txt
-    pci-tool -d 1:0:0 --read="CFG:0x50" > $VL805_VERSION
-    if grep "50] 00000000" $VL805_VERSION > /dev/null; then
-        echo "Inform vc to load vl805 firmware"
-        mbox-bcm2711 notifyxhcireset=0x100000 > /dev/null 2>&1
-    fi
-    echo "Starting USB xHCI controller in the host mode (/dev/usb/*)..."
-    io-usb-otg -t memory=below1G -d bcm2711-xhci pindex=0,memory=below1G
-    waitfor /dev/usb/io-usb-otg
-    waitfor /dev/usb/devu-hcd-bcm2711-xhci.so
+  echo "Starting USB xHCI controller in the host mode (/dev/usb/*)..."
+
+  gpio-rp1 set 42 a2 pn
+  gpio-rp1 set 43 a2 pu
+
+  io-usb-otg -v -d dwc3-xhci ioport=0x1f00200000,irq=0xbf,iosize=0x100000,bmstr=0x1000000000,ioport=0x1f00300000,irq=0xc4,iosize=0x100000,bmstr=0x1000000000
+  waitfor /dev/usb/io-usb-otg 10
 }
 
 ################################################################################################
 ## GPIO utility
 ################################################################################################
-/bin/gpio-bcm2711=gpio-bcm2711
+/bin/gpio-aon-bcm=gpio-aon-bcm
+/bin/gpio-bcm=gpio-bcm
+/bin/gpio-rp1=gpio-rp1
 
 ################################################################################################
 ## Mailbox utility
 ################################################################################################
-/bin/mbox-bcm2711=mbox-bcm2711
+/bin/mbox-bcm=mbox-bcm
+
+################################################################################################
+## RPI msix config utility
+################################################################################################
+/sbin/msix-rp1=msix-rp1
+
+################################################################################################
+## fan control resource manager
+################################################################################################
+/sbin/fan-rpi5=fan-rpi5
 
 ################################################################################################
 ## WIFI firmware and WPA utilities
@@ -1018,7 +1041,7 @@ usb_start.sh = {
 #[perms=0555] /etc/wpa_act={
 #!/bin/sh
 #case  in
-#CONNECTED) echo __BOARD_FILES__   ID=$WPA_ID STR=$WPA_ID_STR >/dev/console; dhcp. -D rpi4 -i  ;;
+#CONNECTED) echo __BOARD_FILES__   ID=$WPA_ID STR=$WPA_ID_STR >/dev/console; dhcp. -D rpi5 -i  ;;
 #DISCONNECTED) echo __BOARD_FILES__   >/dev/console; slay -f dhcp.; ifconfig  delete ;;
 #esac
 #}
