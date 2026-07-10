@@ -13,7 +13,7 @@ SUFFIXES := .build .bin .raw .ui
 IMAGE_LOAD_ADDR = 0x80000
 
 BUILD_TEMPLATE = $(CURDIR)/../../Templates_build_sdp800
-BOARD=rpi4
+BOARD=rpi5
 INSTALL=../install
 
 export ARCH = aarch64le
@@ -22,24 +22,24 @@ export PROCESSOR = aarch64le
 .PHONY: all clean
 
 #all: ifs-$(BOARD).bin ifs-$(BOARD).ui
-all: ifs-$(BOARD).bin ifs-$(BOARD)-hyp.bin disk.img
+all: ifs-$(BOARD)-hyp.bin disk.img
 
 # to boot QNX ifs-rpi4.bin IFS image, add "kernel=ifs-rpi4.bin" to bootable microSD card config.txt file.
-ifs-$(BOARD).bin: $(BOARD).build
-	$(HOST_MKIFS) -v -r$(INSTALL) $(MKIFSFLAGS) $^ $@
+# ifs-$(BOARD).bin: $(BOARD).build
+# 	$(HOST_MKIFS) -v -r$(INSTALL) $(MKIFSFLAGS) $^ $@
 
-ifs-$(BOARD).raw: $(BOARD).build
-	$(CP_HOST) $(BOARD).build $(BOARD)-go.build
-	$(HOST_SED) -i 's/u reg/u arg/' $(BOARD)-go.build
-	$(HOST_MKIFS) -v -r$(INSTALL) $(MKIFSFLAGS)  $(BOARD)-go.build $@
-	$(RM_HOST) $(BOARD)-go.build
+# ifs-$(BOARD).raw: $(BOARD).build
+# 	$(CP_HOST) $(BOARD).build $(BOARD)-go.build
+# 	$(HOST_SED) -i 's/u reg/u arg/' $(BOARD)-go.build
+# 	$(HOST_MKIFS) -v -r$(INSTALL) $(MKIFSFLAGS)  $(BOARD)-go.build $@
+# 	$(RM_HOST) $(BOARD)-go.build
 
 # To boot from U-boot "bootm" command:
 #  - load ifs-rpi4.ui IFS image to 0x80000
 #  - load bcm2711-rpi-4-b.dtb to ${fdt_addr}
 #  - run "bootm 0x80000 - ${fdt_addr}"
-ifs-$(BOARD).ui: ifs-$(BOARD).bin
-	$(HOST_MKI) -a $(IMAGE_LOAD_ADDR) -A arm64 $^ $@
+# ifs-$(BOARD).ui: ifs-$(BOARD).bin
+# 	$(HOST_MKI) -a $(IMAGE_LOAD_ADDR) -A arm64 $^ $@
 	
 # Hypervisor (Hyp) Image Target
 ifs-$(BOARD)-hyp.bin: $(BOARD)-hypervisor.build
