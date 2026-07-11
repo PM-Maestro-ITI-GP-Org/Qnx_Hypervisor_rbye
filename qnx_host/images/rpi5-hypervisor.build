@@ -180,7 +180,8 @@
     ## No rpi5 graphics drivers available yet
     ############################################################################################
     #display_msg "Starting graphics driver ..."
-    #screen -c /usr/lib/graphics/rpi4-drm/graphics-rpi4.conf &
+    screen -c  /lib/graphics/drm-rpi5/graphics-rpi5-2xhdmi.conf &
+    waitfor /dev/screen
 
     ############################################################################################
     ## Start the main shell
@@ -659,6 +660,12 @@ idle_insert=1
 /lib/dll/vdev-smmu.so=vdev-smmu.so
 /lib/dll/vdev-virtio-entropy.so=vdev-virtio-entropy.so
 /lib/dll/vdev-virtio-gpu.so=../../src/vdev-virtio-gpu/vdev-virtio-gpu.so
+/lib/dll/libvirglrenderer.so=../../src/vdev-virtio-gpu/libvirglrenderer.so 
+/lib/dll/libvirglrenderer.so.1=../../src/vdev-virtio-gpu/libvirglrenderer.so.1 
+/lib/dll/libvirglrenderer.so.1.11.0=../../src/vdev-virtio-gpu/libvirglrenderer.so.1.11.0
+/lib/dll/libepoxy.so=../../src/vdev-virtio-gpu/libepoxy.so
+/lib/dll/libepoxy.so.0=../../src/vdev-virtio-gpu/libepoxy.so.0
+/lib/dll/libepoxy.so.0.0.0=../../src/vdev-virtio-gpu/libepoxy.so.0.0.0
 
 # AARCH64LE-specific Virtual Devices
 /lib/dll/vdev-pl011.so=vdev-pl011.so
