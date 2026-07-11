@@ -1,0 +1,311 @@
+
+# hypervisor stuff
+com.qnx.qnx800.target.hypervisor.group
+
+# # Section 1: Base qnx800 -- 8.0.3 RC1
+# com.qnx.qnx800
+# com.qnx.qnx800.eula.qdl
+# com.qnx.qnx800.host.linux.x86_64
+# com.qnx.qnx800.host.linux.x86_64.binutils
+# com.qnx.qnx800.host.linux.x86_64.bison
+# com.qnx.qnx800.host.linux.x86_64.build.thirdparty
+# com.qnx.qnx800.host.linux.x86_64.cndfs
+# com.qnx.qnx800.host.linux.x86_64.dumpefs
+# com.qnx.qnx800.host.linux.x86_64.elfnote
+# com.qnx.qnx800.host.linux.x86_64.fsutils
+# com.qnx.qnx800.host.linux.x86_64.gcc
+# com.qnx.qnx800.host.linux.x86_64.gdb
+# com.qnx.qnx800.host.linux.x86_64.heartbeat
+# com.qnx.qnx800.host.linux.x86_64.idehooks
+# com.qnx.qnx800.host.linux.x86_64.liblicense
+# com.qnx.qnx800.host.linux.x86_64.misc
+# com.qnx.qnx800.host.linux.x86_64.mkqfs
+# com.qnx.qnx800.host.linux.x86_64.mkshadow
+# com.qnx.qnx800.host.linux.x86_64.mkxfs
+# com.qnx.qnx800.host.linux.x86_64.openssl
+# com.qnx.qnx800.host.linux.x86_64.qcc
+# com.qnx.qnx800.host.linux.x86_64.qchecksec
+# com.qnx.qnx800.host.linux.x86_64.qlicense
+# com.qnx.qnx800.host.linux.x86_64.secpol
+# com.qnx.qnx800.host.linux.x86_64.usemsg
+# com.qnx.qnx800.host.linux.x86_64.utils.kdserver
+# com.qnx.qnx800.host.mkqnximage
+# com.qnx.qnx800.host.qnxsdp_env
+# com.qnx.qnx800.osr.bsdtar
+# com.qnx.qnx800.osr.less
+# com.qnx.qnx800.osr.libffi
+# com.qnx.qnx800.osr.sqlite3
+# com.qnx.qnx800.osr.toybox
+# com.qnx.qnx800.target
+# com.qnx.qnx800.target.base
+# com.qnx.qnx800.target.base.bootfiles
+# com.qnx.qnx800.target.base.compression
+# com.qnx.qnx800.target.base.cpp
+# com.qnx.qnx800.target.base.elf
+# com.qnx.qnx800.target.base.ipl
+# com.qnx.qnx800.target.base.ipl.utils
+# com.qnx.qnx800.target.base.libcache
+# com.qnx.qnx800.target.base.libcatalog
+# com.qnx.qnx800.target.base.libdrvr
+# com.qnx.qnx800.target.base.libelf
+# com.qnx.qnx800.target.base.libexpat
+# com.qnx.qnx800.target.base.libforksafe_mutex
+# com.qnx.qnx800.target.base.libm
+# com.qnx.qnx800.target.base.libregex
+# com.qnx.qnx800.target.base.libstartup
+# com.qnx.qnx800.target.base.libstringsa64
+# com.qnx.qnx800.target.base.libxml2
+# com.qnx.qnx800.target.base.mkfiles
+# com.qnx.qnx800.target.base.shutdown
+# com.qnx.qnx800.target.base.slm
+# com.qnx.qnx800.target.base.startup
+# com.qnx.qnx800.target.base.text.icu
+# com.qnx.qnx800.target.base.text.ncurses
+# com.qnx.qnx800.target.binutils
+# com.qnx.qnx800.target.bsp.i2c
+# com.qnx.qnx800.target.bsp.i2c.utils
+# com.qnx.qnx800.target.bsp.spi
+# com.qnx.qnx800.target.connectivity.can
+# com.qnx.qnx800.target.connectivity.can.utils
+# com.qnx.qnx800.target.connectivity.char
+# com.qnx.qnx800.target.connectivity.devc
+# com.qnx.qnx800.target.connectivity.io_char
+# com.qnx.qnx800.target.docs.plugins
+# com.qnx.qnx800.target.drivers.dma
+# com.qnx.qnx800.target.drivers.dvfs
+# com.qnx.qnx800.target.drivers.flash
+# com.qnx.qnx800.target.drivers.libfdt
+# com.qnx.qnx800.target.fs.base
+# com.qnx.qnx800.target.fs.cam
+# com.qnx.qnx800.target.fs.cndfs
+# com.qnx.qnx800.target.fs.dosfs
+# com.qnx.qnx800.target.fs.extfs
+# com.qnx.qnx800.target.fs.flash3
+# com.qnx.qnx800.target.fs.gpt
+# com.qnx.qnx800.target.fs.notify
+# com.qnx.qnx800.target.fs.qcfs
+# com.qnx.qnx800.target.fs.qnx6fs
+# com.qnx.qnx800.target.fs.qtdfs
+# com.qnx.qnx800.target.fs.squashfs
+# com.qnx.qnx800.target.fs.udffs
+# com.qnx.qnx800.target.fs.utils
+# com.qnx.qnx800.target.graphics.group
+# com.qnx.qnx800.target.hw
+# com.qnx.qnx800.target.input.devh
+# com.qnx.qnx800.target.input.keyboard
+# com.qnx.qnx800.target.libbacktrace
+# com.qnx.qnx800.target.microkernel.core
+# com.qnx.qnx800.target.microkernel.kdumper
+# com.qnx.qnx800.target.microkernel.libslog2
+# com.qnx.qnx800.target.microkernel.libslog2.extra
+# com.qnx.qnx800.target.microkernel.slogger2
+# com.qnx.qnx800.target.microkernel.support
+# com.qnx.qnx800.target.microkernel.tools
+# com.qnx.qnx800.target.net.curl
+# com.qnx.qnx800.target.net.devs.cgem
+# com.qnx.qnx800.target.net.devs.dwceqos
+# com.qnx.qnx800.target.net.devs.ffec
+# com.qnx.qnx800.target.net.devs.genet
+# com.qnx.qnx800.target.net.devs.rt
+# com.qnx.qnx800.target.net.devsddk
+# com.qnx.qnx800.target.net.devsfdt
+# com.qnx.qnx800.target.net.devspci
+# com.qnx.qnx800.target.net.devsusb
+# com.qnx.qnx800.target.net.devsvirtio
+# com.qnx.qnx800.target.net.devutils
+# com.qnx.qnx800.target.net.dhcp
+# com.qnx.qnx800.target.net.iosock
+# com.qnx.qnx800.target.net.iperf2
+# com.qnx.qnx800.target.net.iperf3
+# com.qnx.qnx800.target.net.mdnsresponder
+# com.qnx.qnx800.target.net.modsphy
+# com.qnx.qnx800.target.net.netmap
+# com.qnx.qnx800.target.net.nfs
+# com.qnx.qnx800.target.net.ntp
+# com.qnx.qnx800.target.net.openSSH
+# com.qnx.qnx800.target.net.pcap
+# com.qnx.qnx800.target.net.ptpd2
+# com.qnx.qnx800.target.net.tcpdump
+# com.qnx.qnx800.target.net.unbound
+# com.qnx.qnx800.target.net.utils
+# com.qnx.qnx800.target.net.utils.if_up
+# com.qnx.qnx800.target.net.utils.ifwatchd
+# com.qnx.qnx800.target.os_services.base
+# com.qnx.qnx800.target.os_services.hid
+# com.qnx.qnx800.target.os_services.libdevice_publisher
+# com.qnx.qnx800.target.os_services.libqh
+# com.qnx.qnx800.target.os_services.server_monitor
+# com.qnx.qnx800.target.os_services.smmu.api
+# com.qnx.qnx800.target.os_services.smmu.core
+# com.qnx.qnx800.target.pci.capabilities
+# com.qnx.qnx800.target.pci.compat
+# com.qnx.qnx800.target.pci.core.group
+# com.qnx.qnx800.target.pci.debug
+# com.qnx.qnx800.target.pci.hw.x86
+# com.qnx.qnx800.target.pci.lib
+# com.qnx.qnx800.target.pci.server
+# com.qnx.qnx800.target.pci.srvrmod_error_handling
+# com.qnx.qnx800.target.pci.srvrmod_event
+# com.qnx.qnx800.target.pci.srvrmod_misc
+# com.qnx.qnx800.target.pci.uisupport
+# com.qnx.qnx800.target.pci.utils
+# com.qnx.qnx800.target.qscan
+# com.qnx.qnx800.target.screen.base
+# com.qnx.qnx800.target.screen.device_input
+# com.qnx.qnx800.target.screen.docs.plugins
+# com.qnx.qnx800.target.screen.kalman
+# com.qnx.qnx800.target.screen.video_capture
+# com.qnx.qnx800.target.screen.vulkan.sdk
+# com.qnx.qnx800.target.security.authentication
+# com.qnx.qnx800.target.security.crypto.cryptodev
+# com.qnx.qnx800.target.security.crypto.openssl3
+# com.qnx.qnx800.target.security.crypto.pkcs11
+# com.qnx.qnx800.target.security.crypto.qcrypto.core
+# com.qnx.qnx800.target.security.crypto.qcrypto.openssl3
+# com.qnx.qnx800.target.security.crypto.qcrypto.tools
+# com.qnx.qnx800.target.security.pam
+# com.qnx.qnx800.target.security.random
+# com.qnx.qnx800.target.security.secpol
+# com.qnx.qnx800.target.security.secpol.support
+# com.qnx.qnx800.target.security.secpol.tools
+# com.qnx.qnx800.target.security.tcg
+# com.qnx.qnx800.target.text.charconv
+# com.qnx.qnx800.target.tools.cpp
+# com.qnx.qnx800.target.usb.base
+# com.qnx.qnx800.target.usb.dcd
+# com.qnx.qnx800.target.usb.dcd.ut
+# com.qnx.qnx800.target.utils.base.b
+# com.qnx.qnx800.target.utils.base.c
+# com.qnx.qnx800.target.utils.base.d
+# com.qnx.qnx800.target.utils.base.e
+# com.qnx.qnx800.target.utils.base.f
+# com.qnx.qnx800.target.utils.base.g
+# com.qnx.qnx800.target.utils.base.h
+# com.qnx.qnx800.target.utils.base.i
+# com.qnx.qnx800.target.utils.base.k
+# com.qnx.qnx800.target.utils.base.l
+# com.qnx.qnx800.target.utils.base.m
+# com.qnx.qnx800.target.utils.base.n
+# com.qnx.qnx800.target.utils.base.p
+# com.qnx.qnx800.target.utils.base.r
+# com.qnx.qnx800.target.utils.base.s
+# com.qnx.qnx800.target.utils.base.t
+# com.qnx.qnx800.target.utils.base.u
+# com.qnx.qnx800.target.utils.base.w
+# com.qnx.qnx800.target.utils.base.x
+# com.qnx.qnx800.target.utils.debugtools
+# com.qnx.qnx800.target.utils.gawk
+# com.qnx.qnx800.target.utils.hw
+# com.qnx.qnx800.target.utils.libunwind
+# com.qnx.qnx800.target.utils.python3
+# com.qnx.qnx800.target.utils.qnx
+# com.qnx.qnx800.target.utils.system
+# com.qnx.qnx800.target.utils.system.dumpefs
+# com.qnx.qnx800.target.utils.system.dumpifs
+# com.qnx.qnx800.target.utils.utlfd
+# com.qnx.qnx800.target.utils.valgrind
+
+# Section 2: QNX Everywhere demo package -- Contains demolauncher and full screen windowmanager
+com.qnx.qnx800.target.screen.demos.qnxeverywhere
+
+# Section 3: Sensor Framework experimental packages
+com.qnx.qnx800.target.sf.base.group
+# The sf.base.group includes the following
+com.qnx.qnx800.target.sf.base
+com.qnx.qnx800.target.sf.camapi
+com.qnx.qnx800.target.sf.camapi_examples
+com.qnx.qnx800.target.sf.camera.ipc_server
+com.qnx.qnx800.target.sf.camera.usb
+com.qnx.qnx800.target.sf.sensor
+com.qnx.qnx800.target.sf.serdes
+# Multimedia packages that sensor-framework explicitly requires
+com.qnx.qnx800.target.mm.aoi
+com.qnx.qnx800.target.mm.encode.mp4.container
+com.qnx.qnx800.target.mm.input.file
+com.qnx.qnx800.target.mm.mmf.core
+com.qnx.qnx800.target.mm.playback.mp4.container
+com.qnx.qnx800.target.mm.resarb.core
+# Multimedia packages that sensor-framework implicitly requires
+# (where implicit means there is no explicit dependency but things like
+# video recording do not work without them)
+com.qnx.qnx800.target.mm.sw.codecs.group
+com.qnx.qnx800.target.mm.playback.group
+com.qnx.qnx800.target.mm.encode_cast.group
+# The above three packages install a bunch of other packages, listed below.
+# Use the comments beside each package to know which of the three above
+# required it. It may be more than one.
+com.qnx.qnx800.osr.av1
+com.qnx.qnx800.osr.fdk_aac
+com.qnx.qnx800.osr.jsoncpp
+com.qnx.qnx800.osr.libhevc
+com.qnx.qnx800.osr.libyuv
+com.qnx.qnx800.osr.openh264
+com.qnx.qnx800.osr.vpx
+com.qnx.qnx800.target.mm.codec.sw
+com.qnx.qnx800.target.mm.curl.support
+com.qnx.qnx800.target.mm.encode.mp2ts.container
+com.qnx.qnx800.target.mm.encode.raw.container
+com.qnx.qnx800.target.mm.input.rtp
+com.qnx.qnx800.target.mm.input.rtsp
+com.qnx.qnx800.target.mm.omxil.support
+com.qnx.qnx800.target.mm.openmaxal.core
+com.qnx.qnx800.target.mm.openmaxil.comp.av1
+com.qnx.qnx800.target.mm.openmaxil.comp.h264
+com.qnx.qnx800.target.mm.openmaxil.comp.hevc
+com.qnx.qnx800.target.mm.openmaxil.comp.vp9
+com.qnx.qnx800.target.mm.openmaxil.core
+com.qnx.qnx800.target.mm.output.screen
+com.qnx.qnx800.target.mm.output.sound
+com.qnx.qnx800.target.mm.playback.aac.codec
+com.qnx.qnx800.target.mm.playback.aac.container
+com.qnx.qnx800.target.mm.playback.buffering
+com.qnx.qnx800.target.mm.playback.mp2ts.container
+com.qnx.qnx800.target.mm.playback.streaming
+com.qnx.qnx800.target.mm.playback.wav.container
+com.qnx.qnx800.target.mm.renderer.core
+com.qnx.qnx800.target.mm.rtp.support
+com.qnx.qnx800.target.mm.stream.core
+com.qnx.qnx800.target.mm.strm
+
+# Section 4: Screen 
+com.qnx.qnx800.target.screen.img_codecs
+com.qnx.qnx800.target.screen.device_input_screen
+# The following override what was released with SDP803 as we need newer versions
+com.qnx.qnx800.target.screen.base
+com.qnx.qnx800.target.screen.board.common_drm
+com.qnx.qnx800.target.screen.board.common_mesa
+com.qnx.qnx800.target.screen.board.libdrm.v2
+com.qnx.qnx800.target.screen.screen_utils
+com.qnx.qnx800.target.screen.demos_tutorials.source
+
+# Section 5 Fonts packages
+com.qnx.qnx800.target.screen.fonts.engine
+
+# Section 6: For auto mount usb stick
+com.qnx.qnx800.target.utils.publishers.usblauncher
+
+# Section 7: Zoneinfo (timezone) database -- Contains timezone files
+com.qnx.qnx800.osr.zoneinfo
+
+# Section 8: Audio support
+com.qnx.qnx800.target.sound.alsa
+com.qnx.qnx800.target.sound.io_snd
+com.qnx.qnx800.target.sound.usb
+# Not in SDP8.0.3 VC3
+#com.qnx.qnx800dev.target.sound.router
+
+# Section 9: Weston 
+com.qnx.qnx800.target.memstream
+com.qnx.qnx800.target.notify_fd
+
+# my stuff
+com.qnx.qnx800.target.usb.base
+com.qnx.qnx800.target.usb.hcd.xhci.dwc3
+com.qnx.qnx800.target.pci.hw.bcm2712
+com.qnx.qnx800.target.screen.board.rpi
+com.qnx.qnx800.target.screen.board.rpi.server
+com.qnx.qnx800.target.driver.cypress_dhd_sdio_rpi5_2_11
+com.qnx.qnx800.target.screen.vulkan.sdk
+com.qnx.qnx800.target.screen.vulkansc
+com.qnx.qnx800.target.screen.vulkansc.sdk
+com.qnx.qnx800.target.screen.demos

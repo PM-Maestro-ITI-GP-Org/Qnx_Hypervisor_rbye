@@ -3,15 +3,42 @@ SUBDIRS := qnx_host qnx_guests src
 
 .PHONY: all clean $(SUBDIRS) qnx_install flash-sd
 
+PROJECT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+CTI_QSC_URL ?= https://www.qnx.com/swcenter
+SDP_PROFILE_ID := com.qnx.cti-$(shell stat -c '%d_%i' $(PROJECT_DIR))
+QNX_SDP_PATH=$(PROJECT_DIR)/qnx800
+BUILD_NAME := $(TARGET)
+BUILD := $(PROJECT_DIR)$(BUILD_NAME)
+
+
+
+ifeq ("${QSC_CLT_PATH}","")
+  $(error QSC_CLT_PATH is not defined. Please set it to the qnxsoftwarecenter_clt binary))
+else ifeq ($(wildcard $(QSC_CLT_PATH)),)
+  $(error QSC_CLT_PATH '$(QSC_CLT_PATH)' is invalid. Please set it to the qnxsoftwarecenter_clt binary))
+endif
+
+
 all: $(SUBDIRS)
 
-qnx_host: qnx_install qnx_guests apps_src
+qnx_host:  qnx_guests apps_src
 	$(MAKE) -C qnx_host
 
 apps_src:
 	$(MAKE) -C src
 
 qnx_install:
+	echo "Installing QNX packages using qnxsoftwarecenter_clt..."
+	echo "QNX_SDP_PATH: $(QNX_SDP_PATH)"
+	echo "PROJECT_DIR: $(PROJECT_DIR)"
+	# $(QSC_CLT_PATH) -url $(CTI_QSC_URL) -mirrorBaseline qnx800 @options_file
+	$(QSC_CLT_PATH) -url $(CTI_QSC_URL) -cleanInstall -setExperimentalEnabled=true \
+		        -setPolicy=conservative \
+		        -destination $(QNX_SDP_PATH) \
+			-importAndInstall $(BUILD)/qsc_install_packages.list \
+			-profile $(SDP_PROFILE_ID) \
+			$(CTI_QSC_EXTRA_OPTIONS) \
+			@options_file
 	mkdir -p qnx_host/install
 	mkdir -p qnx_guests/install
 
