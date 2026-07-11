@@ -105,3 +105,10 @@ pass
         loc mem:0xfe200000,0x1000,rwn
 
 vdev smmu
+
+vdev virtio-gpu
+	loc 0x1d0c0000
+	intr gic:44
+	scanout-display 1
+	scanout-width 1024
+	scanout-height 600
