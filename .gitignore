@@ -31,3 +31,6 @@ qnx_guests/src/hardware/startup/boards/
 *.sym
 src/spi_loopback/spi_loopback
 src/rpi-gpio/build
+qnx800/
+rpi5_hyp
+options_file
