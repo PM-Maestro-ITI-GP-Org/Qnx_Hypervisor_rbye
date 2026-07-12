@@ -465,7 +465,18 @@ fi
 [uid=0 gid=0 perms=0755] /usr/bin/ssh-keygen=ssh-keygen
 
 [type=link] /etc/ssh = /dev/shmem
-/dev/shmem/sshd_config=${QNX_TARGET}/etc/ssh/sshd_config
+/dev/shmem/sshd_config={
+    # Allow root login since hypervisor guests can only be launched by root in some cases
+    PermitRootLogin yes
+    
+    # The default is to check both .ssh/authorized_keys and .ssh/authorized_keys2
+    # but this is overridden so installations will only check .ssh/authorized_keys
+    AuthorizedKeysFile      .ssh/authorized_keys
+    
+    # override default of no subsystems
+    Subsystem       sftp    /usr/libexec/sftp-server
+
+}
 
 /etc/esh = {
 }
