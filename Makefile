@@ -11,6 +11,11 @@ BUILD_NAME := $(TARGET)
 BUILD := $(PROJECT_DIR)$(BUILD_NAME)
 
 
+ifeq ("${QSC_CLT_PATH}","")
+$(error QSC_CLT_PATH is not defined. Please set it to the qnxsoftwarecenter_clt binary))
+else ifeq ($(wildcard $(QSC_CLT_PATH)),)
+$(error QSC_CLT_PATH '$(QSC_CLT_PATH)' is invalid. Please set it to the qnxsoftwarecenter_clt binary))
+endif
 
 
 
@@ -23,11 +28,6 @@ apps_src:
 	$(MAKE) -C src
 
 qnx_install:
-	ifeq ("${QSC_CLT_PATH}","")
-	$(error QSC_CLT_PATH is not defined. Please set it to the qnxsoftwarecenter_clt binary))
-	else ifeq ($(wildcard $(QSC_CLT_PATH)),)
-	$(error QSC_CLT_PATH '$(QSC_CLT_PATH)' is invalid. Please set it to the qnxsoftwarecenter_clt binary))
-	endif
 
 	echo "Installing QNX packages using qnxsoftwarecenter_clt..."
 	echo "QNX_SDP_PATH: $(QNX_SDP_PATH)"
