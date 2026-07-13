@@ -34,3 +34,4 @@ src/rpi-gpio/build
 qnx800/
 rpi5_hyp
 options_file
+src/giga_spi_8adc/build/
