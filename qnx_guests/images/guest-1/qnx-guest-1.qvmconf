@@ -90,25 +90,25 @@ vdev wdt-sp805
         loc 0x1c0f0000
 
 
-# SPI0 pass-through from host (host phys: 0xfe204000, host IRQ: 150)
-# On RPi4 there is no SMMU/IOMMU, so guest addr MUST equal host addr
-# so that any DMA accesses match host-physical addresses directly.
-# NOTE: host must stop its spi-bcm2711 driver before starting this guest
+#
+# SPI0 (RP1 SPI)
+#
 pass
-        loc mem:0xfe204000,0x1000,rwn
-        intr gic:44=150
+        loc mem:0x1f00050000,0x1000,rwn
+        intr gic:44=179
 
-
-# GPIO pass-through (RPi4 GPIO at 0xfe200000, no IRQ needed - polled)
-# WARNING: Do NOT touch pins used by host system (UART 14,15; SD; I2C 2,3)
-pass
-        loc mem:0xfe200000,0x1000,rwn
+# GPIO - io_bank0 (function select/control)
+pass loc mem:0x1f000d0000,0x4000,rwn
+# GPIO - rio0 (output/input data + atomic set/clr/xor)
+pass loc mem:0x1f000e0000,0x4000,rwn
+# GPIO - pads_bank0 (pull/drive/slew config)
+pass loc mem:0x1f000f0000,0x4000,rwn
 
 vdev smmu
 
-vdev virtio-gpu
-	loc 0x1d0c0000
-	intr gic:44
-	scanout-display 1
-	scanout-width 1024
-	scanout-height 600
+# vdev virtio-gpu
+# 	loc 0x1d0c0000
+# 	intr gic:44
+# 	scanout-display 1
+# 	scanout-width 1024
+# 	scanout-height 600
