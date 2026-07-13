@@ -50,7 +50,7 @@ const full_config_t CONFIG_DEFAULTS = {
         ._reserved0      = 0,
         .source          = MOTOR_SOURCE_ADC,
         .run_state       = MOTOR_RUN_RUN,
-        .sample_rate_hz  = 20000u,  /* 20 kHz ADC scan of 3 currents */
+        .sample_rate_hz  = 20000u,  /* 20 kHz ADC scan of 8 channels */
         .imu_rate_hz     = 1000u,   /* 1 kHz MPU6050 poll (native max) */
         .reserved        = {0},
     },

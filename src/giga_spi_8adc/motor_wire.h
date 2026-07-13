@@ -25,7 +25,7 @@
 /* Bump whenever ANY wire/shm struct layout changes (esp. motor_row_t). Stamped
  * into every frame header and into the shm region; the producer and every
  * consumer compare it and refuse to run on a mismatch.                         */
-#define MOTOR_CONTRACT_VERSION   3u   /* v3: row grew to 3 currents (3-phase); MAX_ROWS reduced */
+#define MOTOR_CONTRACT_VERSION   4u   /* v4: row grew to 8 currents (8-ch ADC scan); MAX_ROWS reduced */
 
 /* ============================ wire framing ================================ */
 #define MOTOR_FRAME_MAGIC        0x4D4F5452u  /* "MOTR" little-endian resync marker */
@@ -34,20 +34,24 @@
  * parameter and MUST be <= MOTOR_MAX_ROWS_PER_BLOCK. Buffers are sized to the
  * max so a config change never requires recompilation.
  *
- * Reduced from 512 (v2) to 300 when the row grew to 3 currents. Worst-case
- * frame at MAX rows: 24 + 300*14 + 4 = 4228 bytes = 8.5 ms transfer @ 4 MHz
- * SPI, comfortably under a 10 ms (100 Hz) block period.                     */
-#define MOTOR_MAX_ROWS_PER_BLOCK 300u
+ * Reduced 512(v2) -> 300(v3, 3 currents) -> 200(v4, 8 currents). The row
+ * doubled to 24 B at v4, so the ceiling drops again to keep the frame buffers
+ * inside the F401CC's 64 KB SRAM and the worst-case transfer under the block
+ * period. Worst-case frame at MAX rows: 24 + 200*24 + 4 = 4828 bytes = 4.83 ms
+ * transfer @ 8 MHz SPI -- the link was raised 4 -> 8 MHz at v4 to carry the
+ * doubled payload (8ch*20kHz*24B = 3.84 Mbit/s exceeds a 4 MHz link) -- well
+ * under a 10 ms (100 Hz) block period.                                       */
+#define MOTOR_MAX_ROWS_PER_BLOCK 200u
 
 /* ---- the per-timestep "wide row" -----------------------------------------
- *  FINAL sensor set: 3 currents (three-phase), vibration (3 axes), speed.
+ *  Sensor set: 8 ADC channels (PA0..PA7 = IN0..IN7), vibration (3 axes), speed.
  *  Raw counts on the wire; scaling to engineering units is applied downstream
  *  from the config constants. If the sensor set ever changes, edit these
  *  fields, update the static_assert, and bump MOTOR_CONTRACT_VERSION.
  */
 #pragma pack(push, 1)
 typedef struct {
-    uint16_t current[3]; /* three ADC1 channels (PA0 IN0, PA1 IN1, PA2 IN2)      */
+    uint16_t current[8]; /* eight ADC1 channels, PA0..PA7 = IN0..IN7 (scan order) */
     int16_t  vib_x;      /* MPU6050 over I2C, ZOH-held at imu_rate_hz            */
     int16_t  vib_y;
     int16_t  vib_z;
@@ -55,7 +59,7 @@ typedef struct {
 } motor_row_t;
 #pragma pack(pop)
 
-_Static_assert(sizeof(motor_row_t) == 14,
+_Static_assert(sizeof(motor_row_t) == 24,
                "motor_row_t layout changed: update this size and bump MOTOR_CONTRACT_VERSION");
 
 /* ---- frame header (prepended to every block on the wire) ------------------

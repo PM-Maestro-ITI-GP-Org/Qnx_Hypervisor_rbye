@@ -81,7 +81,7 @@ int main(void)
         while (read_pos < wp) {
             if (motor_ring_read_slot(&r->ring, read_pos, &blk)) {
                 blocks_seen++;
-                if (blk.n_rows > 0) last_first_current = blk.rows[0].current;
+                if (blk.n_rows > 0) last_first_current = blk.rows[0].current[0];
             } else {
                 drops++;                              /* overwritten mid-copy */
             }
@@ -90,11 +90,15 @@ int main(void)
 
         if (ok) {
             printf("snap seq=%-8" PRIu32 " ts=%-12" PRIu64
-                   " cur=%-4u vib=(%d,%d,%d) rpm=%u | "
+                   " cur=%u/%u/%u vph=%u/%u/%u vdc=%u vspd=%u"
+                   " vib=(%d,%d,%d) rpm=%u | "
                    "ring wp=%" PRIu64 " seen=%" PRIu64 " drops=%" PRIu64
                    " (blk[0].cur=%u)\n",
                    s_seq, s_ts,
-                   row.current, row.vib_x, row.vib_y, row.vib_z,
+                   row.current[0], row.current[1], row.current[2],
+                   row.current[3], row.current[4], row.current[5],
+                   row.current[6], row.current[7],
+                   row.vib_x, row.vib_y, row.vib_z,
                    row.rpm,
                    wp, blocks_seen, drops, last_first_current);
         } else {
