@@ -52,3 +52,37 @@ mount -tdos /dev/sd0t12 /dos
 /guests/guest-2/qnx-guest.ifs = ../../qnx_guests/images/guest-2/qnx800-guest-2.ifs
 /guests/guest-2/qnx-guest-2.qvmconf = ../../qnx_guests/images/guest-2/qnx-guest-2.qvmconf
 
+#####################################################################################################
+/deploy/=/home/maxmaster/depoly/
+
+
+/system/etc/spi.conf = {
+# See spi-template.conf or SDP docs for a full description of the configuration fields.
+
+[globals]
+verbose=5
+
+[bus]
+busno=0
+name=spi0
+base=0x1f00050000
+# GUEST IRQ = 44, HOST IRQ 179 <---------
+irq=179 
+input_clock=200000000
+bs=cs_max=1
+
+[dev]
+parent_busno=0
+devno=0
+name=dev0
+clock_rate=100000000
+cpha=1
+cpol=0
+bit_order=msb
+word_width=32
+idle_insert=1
+
+}
+
+
+/lib/graphics/drm-rpi5/graphics-rpi5-2xhdmi.conf=../../qnx800/target/qnx/aarch64le/usr/lib/graphics/drm-rpi5/graphics-rpi5-2xhdmi.conf
