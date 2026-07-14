@@ -1,0 +1,82 @@
+--- vdev-virtio-gpu.c.orig	2026-07-13 23:13:41.750648514 +0300
++++ vdev-virtio-gpu.c	2026-07-13 23:15:02.168618938 +0300
+@@ -67,7 +67,6 @@
+     uint32_t          id;            /* 0 == free slot */
+     struct iovec     *iov;
+     unsigned          niov;
+-    gasp_map_handle_t *handles;      /* one per iov, for gasp_unmap on release */
+ };
+ 
+ struct gpu_state {
+@@ -123,9 +122,10 @@
+ static void res_drop_backing(struct gpu_resource *r)
+ {
+     for (unsigned i = 0; i < r->niov; ++i)
+-        gasp_unmap_handle(&r->handles[i]);
+-    free(r->iov);   free(r->handles);
+-    r->iov = NULL;  r->handles = NULL;  r->niov = 0;
++        if (r->iov[i].iov_base)
++            gasp_unmap(r->iov[i].iov_base, r->iov[i].iov_len, 0);
++    free(r->iov);
++    r->iov = NULL;  r->niov = 0;
+ }
+ 
+ /* Map the guest mem_entry array (trailing @ent for @n entries) into an iov. */
+@@ -135,11 +135,10 @@
+     res_drop_backing(r);
+     if (n == 0) return 0;
+     r->iov = calloc(n, sizeof(*r->iov));
+-    r->handles = calloc(n, sizeof(*r->handles));
+-    if (!r->iov || !r->handles) { res_drop_backing(r); return ENOMEM; }
++    if (!r->iov) return ENOMEM;
+     for (unsigned i = 0; i < n; ++i) {
+-        if (gasp_map(vdp, ent[i].addr, ent[i].length, GMF_READ | GMF_WRITE,
+-                     &r->handles[i]) != EOK) {
++        void *va = gasp_map_vdma(vdp, ent[i].addr, ent[i].length, GMF_READ | GMF_WRITE);
++        if (!va) {
+             /* A partial map = a shorter iov list than the guest's mem_entry list,
+              * which silently misaligns every later transfer offset. Fail the whole
+              * attach instead of handing virgl a truncated backing. */
+@@ -147,7 +146,7 @@
+             res_drop_backing(r);
+             return EIO;
+         }
+-        r->iov[i].iov_base = gasp_get_vaddr(&r->handles[i]);
++        r->iov[i].iov_base = va;
+         r->iov[i].iov_len  = ent[i].length;
+     }
+     r->niov = n;
+@@ -641,13 +640,13 @@
+                  * permits the response to scatter across several, but the Linux
+                  * driver never does — revisit if a different guest driver appears. */
+                 if (resp_cap == 0) { resp_addr = daddr; resp_cap = dlen; }
+-            } else if (cmdlen < sizeof(cmd)) {
+-                gasp_map_handle_t mh;
+-                if (gasp_map(vdp, daddr, dlen, GMF_READ, &mh) == EOK) {
++                } else if (cmdlen < sizeof(cmd)) {
++                void *va = gasp_map_vdma(vdp, daddr, dlen, GMF_READ);
++                if (va) {
+                     unsigned c = min(dlen, (uint32_t)(sizeof(cmd) - cmdlen));
+-                    memcpy(cmd + cmdlen, gasp_get_vaddr(&mh), c);
++                    memcpy(cmd + cmdlen, va, c);
+                     cmdlen += c;
+-                    gasp_unmap_handle(&mh);
++                    gasp_unmap(va, dlen, 0);
+                 }
+             }
+             if (dnext == VQ_INVALID_ID) break;
+@@ -656,10 +655,10 @@
+ 
+         unsigned resplen = handle_cmd(vdp, cmd, cmdlen, resp, min(resp_cap, (uint32_t)sizeof(resp)));
+         if (resp_cap && resplen) {
+-            gasp_map_handle_t mh;
+-            if (gasp_map(vdp, resp_addr, resp_cap, GMF_WRITE, &mh) == EOK) {
+-                memcpy(gasp_get_vaddr(&mh), resp, min(resplen, resp_cap));
+-                gasp_unmap_handle(&mh);
++            void *va = gasp_map_vdma(vdp, resp_addr, resp_cap, GMF_WRITE);
++            if (va) {
++                memcpy(va, resp, min(resplen, resp_cap));
++                gasp_unmap(va, resp_cap, 1); /* flush=1: host wrote data guest must read */
+             }
+         }
+         vq_put_to_driver(vq, bufid, resplen, true);

@@ -1,0 +1,13 @@
+--- src/vrend/vrend_winsys_egl.c
++++ src/vrend/vrend_winsys_egl.c
+@@ -347,7 +347,9 @@ struct virgl_egl *virgl_egl_init(EGLNativeDisplayType display_id, bool surfacele
+       goto fail;
+ 
+ #ifdef ENABLE_GBM_ALLOCATION
+-   if (virgl_egl_get_display(egl)) {
++   /* QNX: with no gbm device (pure surfaceless), skip the gbm-device query path
++    * (it dereferences egl->gbm) and fall through to EGL surfaceless below. */
++   if (egl->gbm && virgl_egl_get_display(egl)) {
+      /* Make -Wdangling-else happy. */
+    } else /* Fallback to surfaceless. */
+ #endif

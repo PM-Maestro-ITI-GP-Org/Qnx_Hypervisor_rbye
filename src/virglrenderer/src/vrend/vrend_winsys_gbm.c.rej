@@ -1,0 +1,15 @@
+--- src/vrend/vrend_winsys_gbm.c
++++ src/vrend/vrend_winsys_gbm.c
+@@ -135,8 +135,12 @@ static int rendernode_open(void)
+ 
+    fd = -1;
+    while ((dir_ent = readdir(dir))) {
++#ifdef DT_CHR
++      /* ponytail: d_type is a non-POSIX fast-path filter (absent on QNX). The
++       * renderD-name + drmGetVersion checks below are the real validation. */
+       if (dir_ent->d_type != DT_CHR)
+          continue;
++#endif
+ 
+       if (strncmp(dir_ent->d_name, "renderD", 7))
+          continue;
