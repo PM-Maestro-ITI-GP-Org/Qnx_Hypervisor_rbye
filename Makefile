@@ -11,10 +11,12 @@ BUILD_NAME := $(TARGET)
 BUILD := $(PROJECT_DIR)$(BUILD_NAME)
 
 
+ifneq (,$(filter qnx_install,$(MAKECMDGOALS)))
 ifeq ("${QSC_CLT_PATH}","")
 $(error QSC_CLT_PATH is not defined. Please set it to the qnxsoftwarecenter_clt binary))
 else ifeq ($(wildcard $(QSC_CLT_PATH)),)
 $(error QSC_CLT_PATH '$(QSC_CLT_PATH)' is invalid. Please set it to the qnxsoftwarecenter_clt binary))
+endif
 endif
 
 

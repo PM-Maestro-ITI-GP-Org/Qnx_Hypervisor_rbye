@@ -35,3 +35,8 @@ qnx800/
 rpi5_hyp
 options_file
 src/giga_spi_8adc/build/
+src/oss_*/*.tar.xz
+src/oss_*/*/
+src/shm_sender/build/
+src/libepoxy/build-qnx
+src/virglrenderer/build-qnx
