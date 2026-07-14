@@ -53,7 +53,6 @@ mount -tdos /dev/sd0t12 /dos
 /guests/guest-2/qnx-guest-2.qvmconf = ../../qnx_guests/images/guest-2/qnx-guest-2.qvmconf
 
 #####################################################################################################
-/deploy/=/home/maxmaster/depoly/
 
 
 /system/etc/spi.conf = {
@@ -86,3 +85,7 @@ idle_insert=1
 
 
 /lib/graphics/drm-rpi5/graphics-rpi5-2xhdmi.conf=../../qnx800/target/qnx/aarch64le/usr/lib/graphics/drm-rpi5/graphics-rpi5-2xhdmi.conf
+
+#####################################################################################################
+########################################## QT Part ##################################################
+/QT_Demo_APP=../../src/QT/Demo_APP/build_qnx/deploy
