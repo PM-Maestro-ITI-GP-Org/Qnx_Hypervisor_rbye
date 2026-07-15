@@ -928,3 +928,16 @@ config.json=../../../src/giga_spi_8adc/config.json
 # Referenced as an external file (not an inline "= { }" block): mkifs ends an inline
 # block at the first '}', which a shell script's ${brace} expansions would trip.
 [perms=0755] /scripts/graphics-virtio-start.sh=../../../conf/display/graphics-virtio-start.sh
+
+
+################################################################################################
+## Qt demo app (QtQuick2DDemo, software render backend). Whole deploy tree -> /QT_Demo_APP/.
+## Run in the guest AFTER graphics is up:  sh /QT_Demo_APP/run.sh
+## NOTE: this deploy is ~188MB; a guest IFS is RAM-resident, so guest RAM was raised to 2G
+## in qnx-guest-1.qvmconf to fit the larger IFS + Qt runtime. Trim the deploy or move it to
+## a disk if you need the guest smaller.
+################################################################################################
+/lib/dll/ibeventfd.so.1=libeventfd.so.1
+/lib/dll/ibeventfd.so=libeventfd.so
+
+QT_Demo_APP/ =../../../src/QT/Demo_APP/build_qnx/deploy

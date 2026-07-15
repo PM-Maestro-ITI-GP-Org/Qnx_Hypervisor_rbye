@@ -4,7 +4,10 @@
 
 system guest_1
 
-ram 0x80000000,512M
+# Raised from 512M: the guest IFS is RAM-resident and the Qt demo deploy (~188MB,
+# staged as /QT_Demo_APP) pushes the IFS to ~490MB. 2G leaves room for the IFS + Qt
+# runtime + graphics buffers. Lower it if you trim/remove the Qt app.
+ram 0x80000000,2G
 
 # Add a 'cpu' for each virtual CPU that the guest will have
 #cpu
@@ -116,5 +119,8 @@ vdev virtio-gpu
 	loc 0x1c0e0000
 	intr gic:39
 	scanout-display 1
+	# Must equal the PHYSICAL panel size (1024x600), the host display-1 video-mode
+	# (graphics-rpi5-2xhdmi.conf), and the guest graphics-virtio-mmio.conf video-mode.
+	# The vdev reads back 1:1 (no scaling), so any mismatch corners/scales the guest.
 	scanout-width 1024
 	scanout-height 600

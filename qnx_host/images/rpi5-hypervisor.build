@@ -730,6 +730,10 @@ idle_insert=1
 
 # Config
 # /lib/graphics/drm-rpi5/graphics-rpi5-2xhdmi.conf=graphics/drm-rpi5/graphics-rpi5-2xhdmi.conf
+# Repo-versioned host Screen config (display 1 = the guest's 1024x600 panel) + its
+# startup script. Launched from the boot script below via host-graphics-start.sh.
+/lib/graphics/drm-rpi5/graphics-host-rpi5.conf=../../conf/display/graphics-host-rpi5.conf
+[perms=0755] /scripts/host-graphics-start.sh=../../conf/display/host-graphics-start.sh
 /lib/graphics/vulkan/VkLayer_khronos_validation.json=graphics/vulkan/VkLayer_khronos_validation.json
 
 [type=link] /lib/libscreen.so=libscreen.so.1
@@ -1097,9 +1101,8 @@ fi
     ############################################################################################
     ## enable rpi 5 graphics driver // will see later
     ############################################################################################
-    display_msg "Starting graphics driver ..."
-    screen -c  /lib/graphics/drm-rpi5/graphics-rpi5-2xhdmi.conf &
-    waitfor /dev/screen
+    echo "Starting host graphics ..."
+    ksh /scripts/host-graphics-start.sh
 }
 
 

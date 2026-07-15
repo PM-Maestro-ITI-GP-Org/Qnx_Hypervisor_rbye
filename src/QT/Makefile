@@ -12,6 +12,7 @@ all:
 
 clean:
 	for d in */; do \
+		[ "$$d" = "qt6-qnx-libs/" ] && continue; \
 		[ -f "$$d/Makefile" ] || continue; \
 		$(MAKE) -C "$$d" clean || true; \
 	done
