@@ -57,6 +57,7 @@
 
     pci-server --bus-scan-limit=3 -c &
     waitfor /dev/pci
+    pci-connector -n pci_mux
 
     # use msix-rp1 to setup RP1 USB, ethernet, UART2, UART4, I2C, SPI IRQs
     sleep 1
@@ -175,13 +176,7 @@
     waitfor /dev/io-spi
 
 
-    ############################################################################################
-    ## enable rpi 5 graphics driver // will see later
-    ## No rpi5 graphics drivers available yet
-    ############################################################################################
-    display_msg "Starting graphics driver ..."
-    screen -c  /lib/graphics/drm-rpi5/graphics-rpi5-2xhdmi.conf &
-    waitfor /dev/screen
+
 
     ############################################################################################
     ## Start the main shell
@@ -670,13 +665,23 @@ idle_insert=1
 /lib/dll/vdev-virtio-net.so=vdev-virtio-net.so
 /lib/dll/vdev-smmu.so=vdev-smmu.so
 /lib/dll/vdev-virtio-entropy.so=vdev-virtio-entropy.so
+
+
+/lib/dll/libpci_mux.so=libpci_mux.so
+/lib/dll/libpci_mux.so.1.0=libpci_mux.so.1.0
 /lib/dll/vdev-virtio-gpu.so=../../src/vdev-virtio-gpu/vdev-virtio-gpu.so
-/lib/dll/libvirglrenderer.so=../../src/vdev-virtio-gpu/libvirglrenderer.so 
-/lib/dll/libvirglrenderer.so.1=../../src/vdev-virtio-gpu/libvirglrenderer.so.1 
-/lib/dll/libvirglrenderer.so.1.11.0=../../src/vdev-virtio-gpu/libvirglrenderer.so.1.11.0
-/lib/dll/libepoxy.so=../../src/vdev-virtio-gpu/libepoxy.so
-/lib/dll/libepoxy.so.0=../../src/vdev-virtio-gpu/libepoxy.so.0
-/lib/dll/libepoxy.so.0.0.0=../../src/vdev-virtio-gpu/libepoxy.so.0.0.0
+/lib/dll/libvirglrenderer.so=../../src/virglrenderer/build-qnx/src/libvirglrenderer.so
+/lib/dll/libvirglrenderer.so.1=../../src/virglrenderer/build-qnx/src/libvirglrenderer.so.1
+/lib/dll/libvirglrenderer.so.1.11.0=../../src/virglrenderer/build-qnx/src/libvirglrenderer.so.1.11.0
+/lib/dll/libepoxy.so=../../src/libepoxy/build-qnx/src/libepoxy.so
+/lib/dll/libepoxy.so.0=../../src/libepoxy/build-qnx/src/libepoxy.so.0
+/lib/dll/libepoxy.so.0.0.0=../../src/libepoxy/build-qnx/src/libepoxy.so.0.0.0
+/lib/dll/ibeventfd.so.1=libeventfd.so.1
+/lib/dll/ibeventfd.so=libeventfd.so
+/lib/dll/libdrm.so.2=libdrm.so.2
+/lib/dll/libdrm.so.1=libdrm.so.1
+/lib/dll/libdrm.so=libdrm.so
+
 
 # AARCH64LE-specific Virtual Devices
 /lib/dll/vdev-pl011.so=vdev-pl011.so
@@ -1089,6 +1094,12 @@ if [ -e /scripts/board_startup.sh ]; then
     echo "Starting board customize script ..."
     ksh /scripts/board_startup.sh
 fi
+    ############################################################################################
+    ## enable rpi 5 graphics driver // will see later
+    ############################################################################################
+    display_msg "Starting graphics driver ..."
+    screen -c  /lib/graphics/drm-rpi5/graphics-rpi5-2xhdmi.conf &
+    waitfor /dev/screen
 }
 
 
@@ -1182,3 +1193,8 @@ pass out on bridge0
 /usr/bin/fb_host=../../src/frame_router/build/fb_host
 /usr/bin/motor_controller=../../src/giga_spi_8adc/build/motor_controller
 /usr/bin/config.json=../../src/giga_spi_8adc/config.json
+
+# PCI Multiplexer Client API
+/lib/libpci_mux.so=libpci_mux.so
+# PCI Multiplexer Service, used by QNX Hypervisor
+/sbin/pci-connector=pci-connector

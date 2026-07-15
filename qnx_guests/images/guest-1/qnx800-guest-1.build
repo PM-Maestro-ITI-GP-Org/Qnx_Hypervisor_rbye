@@ -39,9 +39,9 @@
 # depend on those devices being found under /dev/pci, un-comment the
 # lines below. We leave it commented-out here because the standard guest
 # do not have PCI devices, no FDT info for them included.
-    #display_msg "Starting PCI server..."
-    #pci-server --bus-scan-limit=0
-    #waitfor /dev/pci
+# display_msg "Starting PCI server..."
+# pci-server --bus-scan-limit=0
+# waitfor /dev/pci
 
 
 #   NOTE: If using devc-virtio, it is not necessary to include another serial
@@ -683,7 +683,9 @@ if [ -e /scripts/board_startup.sh ]; then
     ksh /scripts/board_startup.sh
 fi
 
-screen -c /usr/share/screen/graphics-virtual-display.conf
+# Bring up the paravirtual GPU (drm-virtio over MMIO + QNX Screen). Uncomment to
+# start it automatically at boot; otherwise run it by hand from the guest shell.
+# ksh /scripts/graphics-virtio-start.sh
 }
 
 
@@ -826,23 +828,24 @@ lib/ =../../../src/someip/commonapi-qnx/build-rpi/lib
 
 /usr/lib/libdrm.so.1=libdrm.so.1
 /usr/lib/libgbm.so.1=libgbm.so.1
-/sbin/drm-rpi4=drm-rpi4
+# /sbin/drm-rpi4=drm-rpi4
 
-/usr/lib/graphics/rpi4-drm/libEGL-mesa.so=graphics/rpi4-drm/libEGL-mesa.so
-/usr/lib/graphics/rpi4-drm/libGLESv2-mesa.so=graphics/rpi4-drm/libGLESv2-mesa.so
-/usr/lib/graphics/rpi4-drm/broadcom_icd.json=graphics/rpi4-drm/broadcom_icd.json
-/usr/lib/graphics/rpi4-drm/gpu_drm-rpi4.so=graphics/rpi4-drm/gpu_drm-rpi4.so
-/usr/lib/graphics/rpi4-drm/graphics-rpi4.conf=graphics/rpi4-drm/graphics-rpi4.conf
-/usr/lib/graphics/rpi4-drm/graphics-rpi4-atomic.conf=graphics/rpi4-drm/graphics-rpi4-atomic.conf
-/usr/lib/graphics/rpi4-drm/libWFDrpi4-drm.so=graphics/rpi4-drm/libWFDrpi4-drm.so
-/usr/lib/graphics/rpi4-drm/libWFDrpi4-drm-atomic.so=graphics/rpi4-drm/libWFDrpi4-drm-atomic.so
-/usr/lib/graphics/rpi4-drm/libwfdcfg-rpi4-generic.so=graphics/rpi4-drm/libwfdcfg-rpi4-generic.so
-/usr/lib/graphics/rpi4-drm/v3d_dri.so=graphics/rpi4-drm/v3d_dri.so
-/usr/lib/dri_gbm.so=dri_gbm.so
-/usr/lib/graphics/rpi4-drm/libvulkan_broadcom.so=graphics/rpi4-drm/libvulkan_broadcom.so
+# /usr/lib/graphics/rpi4-drm/libEGL-mesa.so=graphics/rpi4-drm/libEGL-mesa.so
+# /usr/lib/graphics/rpi4-drm/libGLESv2-mesa.so=graphics/rpi4-drm/libGLESv2-mesa.so
+# /usr/lib/graphics/rpi4-drm/broadcom_icd.json=graphics/rpi4-drm/broadcom_icd.json
+# /usr/lib/graphics/rpi4-drm/gpu_drm-rpi4.so=graphics/rpi4-drm/gpu_drm-rpi4.so
+# /usr/lib/graphics/rpi4-drm/graphics-rpi4.conf=graphics/rpi4-drm/graphics-rpi4.conf
+# /usr/lib/graphics/rpi4-drm/graphics-rpi4-atomic.conf=graphics/rpi4-drm/graphics-rpi4-atomic.conf
+# /usr/lib/graphics/rpi4-drm/libWFDrpi4-drm.so=graphics/rpi4-drm/libWFDrpi4-drm.so
+# /usr/lib/graphics/rpi4-drm/libWFDrpi4-drm-atomic.so=graphics/rpi4-drm/libWFDrpi4-drm-atomic.so
+# /usr/lib/graphics/rpi4-drm/libwfdcfg-rpi4-generic.so=graphics/rpi4-drm/libwfdcfg-rpi4-generic.so
+# /usr/lib/graphics/rpi4-drm/v3d_dri.so=graphics/rpi4-drm/v3d_dri.so
+# /usr/lib/dri_gbm.so=dri_gbm.so
+# /usr/lib/graphics/rpi4-drm/libvulkan_broadcom.so=graphics/rpi4-drm/libvulkan_broadcom.so
+# /lib/dll/screen-rpi4drm.so=screen-rpi4drm.so
+# /usr/lib/graphics/rpi4-drm/libglapi-mesa.so=graphics/rpi4-drm/libglapi-mesa.so
+
 /lib/dll/screen-gles2blt.so=screen-gles2blt.so
-/lib/dll/screen-rpi4drm.so=screen-rpi4drm.so
-/usr/lib/graphics/rpi4-drm/libglapi-mesa.so=graphics/rpi4-drm/libglapi-mesa.so
 /usr/lib/libEGL.so.1=libEGL.so.1
 /usr/lib/libGLESv2.so.1=libGLESv2.so.1
 /usr/lib/libWFD.so.1=libWFD.so.1
@@ -876,3 +879,52 @@ config.json=../../../src/giga_spi_8adc/config.json
 /sbin/msix-rp1=../../../qnx_host/install/aarch64le/bin/msix-rp1
 ########################################################################
 
+
+/usr/bin/drm-virtio=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/bin/drm-virtio
+
+/usr/lib/EGL-mesa.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/EGL-mesa.so
+/usr/lib/gfxstream_vk_icd.json=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/gfxstream_vk_icd.json
+/usr/lib/GLESv2-mesa.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/GLESv2-mesa.so
+/usr/lib/gpu_virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/gpu_virtio.so
+/usr/lib/libEGL_Angle.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libEGL_Angle.so
+/usr/lib/libGLESv2_Angle.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libGLESv2_Angle.so
+/usr/lib/libwfdcfg-virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libwfdcfg-virtio.so
+/usr/share/screen/libwfdcfg-virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libwfdcfg-virtio.so
+/usr/lib/libWFDvirtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libWFDvirtio.so
+/usr/lib/screen-alloc-virtio-gfxstream.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-gfxstream.so
+/usr/lib/screen-alloc-virtio-virgl.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-virgl.so
+/usr/share/screen/screen-alloc-virtio-gfxstream.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-gfxstream.so
+/usr/share/screen/screen-alloc-virtio-virgl.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-virgl.so
+/usr/lib/virtio_dri.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/virtio_dri.so
+/usr/lib/virtio_icd.json=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/virtio_icd.json
+/usr/lib/virtio_opencl.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/virtio_opencl.so
+/usr/lib/vulkan_gfxstream.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/vulkan_gfxstream.so
+/usr/lib/vulkan_virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/vulkan_virtio.so
+# Vulkan loader (from the SDP): NEEDED by screen-alloc-virtio-virgl.so, which
+# libkhronos dlopen's for graphics-virtio-mmio.conf. Without it, "screen -c" fails
+# with "libvulkan.so.1 => unable to load". Its own deps (libm/libc/libgcc_s) are
+# already staged; it dlopen's the ICDs (vulkan_virtio.so) which are staged above.
+/usr/lib/libvulkan.so.1=libvulkan.so.1
+/lib/dll/libdrm.so.2=libdrm.so.2
+/lib/dll/libdrm.so.1=libdrm.so.1
+/lib/dll/libdrm.so=libdrm.so
+
+
+/usr/share/screen/graphics-virtio-gfxstream.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-gfxstream.conf
+/usr/share/screen/graphics-virtio-gfxstream-virtual.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-gfxstream-virtual.conf
+/usr/share/screen/graphics-virtio-virgl.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl.conf
+/usr/share/screen/graphics-virtio-virgl-modern.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl-modern.conf
+/usr/share/screen/graphics-virtio-virgl-virtual.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl-virtual.conf
+
+
+################################################################################################
+## virtio-gpu guest driver over MMIO (talks to host vdev-virtio-gpu.so)
+##  - drm-virtio attaches to the MMIO virtio-gpu vdev (NO PCI); creates /dev/dri/card0
+##  - screen -c graphics-virtio-mmio.conf brings up /dev/screen (Mesa virgl GL)
+##  - run /scripts/graphics-virtio-start.sh from the guest shell (or customize_startup.sh)
+################################################################################################
+/usr/share/screen/graphics-virtio-mmio.conf=../../../conf/display/graphics-virtio-mmio.conf
+
+# Referenced as an external file (not an inline "= { }" block): mkifs ends an inline
+# block at the first '}', which a shell script's ${brace} expansions would trip.
+[perms=0755] /scripts/graphics-virtio-start.sh=../../../conf/display/graphics-virtio-start.sh

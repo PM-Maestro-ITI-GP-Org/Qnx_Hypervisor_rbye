@@ -929,7 +929,7 @@ gpu_control(vdev_t *vdp, vdev_ctrl_options_t ctrl, const char *arg)
         break;
 
     case VDEV_CTRL_GEN_FDT:
-        vio_ctrl_gen_fdt(&s->vs, "gpu", (int)(uintptr_t)arg);
+        vio_ctrl_gen_fdt(&s->vs, "virtio_gpu", (int)(uintptr_t)arg);
         break;
     case VDEV_CTRL_PCI_BARS:
         return vio_ctrl_pci_bars(&s->vs, arg);

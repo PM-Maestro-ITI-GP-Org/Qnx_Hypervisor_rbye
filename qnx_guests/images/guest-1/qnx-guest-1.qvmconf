@@ -106,9 +106,15 @@ pass loc mem:0x1f000f0000,0x4000,rwn
 
 vdev smmu
 
-# vdev virtio-gpu
-# 	loc 0x1d0c0000
-# 	intr gic:44
-# 	scanout-display 1
-# 	scanout-width 1024
-# 	scanout-height 600
+#set pci-mux-path /dev/pci_mux
+
+#vdev gic msi 0x30000000,0x50,0x100
+#vdev pci-host-bridge
+#	name pcihost
+
+vdev virtio-gpu
+	loc 0x1c0e0000
+	intr gic:39
+	scanout-display 1
+	scanout-width 1024
+	scanout-height 600
