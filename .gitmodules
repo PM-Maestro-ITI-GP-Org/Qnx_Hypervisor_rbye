@@ -1,0 +1,3 @@
+[submodule "src/vdev-virtio-gpu"]
+	path = src/vdev-virtio-gpu
+	url = https://github.com/maxmaster55/QNX_vdev-Virtio-GPU.git
