@@ -1,3 +1,9 @@
 [submodule "src/vdev-virtio-gpu"]
 	path = src/vdev-virtio-gpu
 	url = https://github.com/maxmaster55/QNX_vdev-Virtio-GPU.git
+[submodule "src/virglrenderer"]
+	path = src/virglrenderer
+	url = https://github.com/maxmaster55/QNX_virglrenderer.git
+[submodule "src/libepoxy"]
+	path = src/libepoxy
+	url = https://github.com/maxmaster55/QNX_libepoxy.git
