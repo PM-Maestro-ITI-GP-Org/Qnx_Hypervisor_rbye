@@ -59,7 +59,26 @@ part_dos_boot.img: $(BOARD)-part_dos_boot.build ifs-$(BOARD)-hyp.bin
 	# Create the DOS partition image for UEFI boot mode
 	mkfatfsimg -vv $< $@
 
-part_qnx_data.img: part_qnx_data.build
+# The QNX6 data partition bakes in the guest IFS images + qvmconfs (see the
+# "# copy the guests" section of part_qnx_data.build). Depend on them so a rebuilt
+# guest triggers a data-partition -> disk.img rebuild. This is the fix for
+# "I rebuilt the guest but the host image didn't update".
+GUEST_DIR := ../../qnx_guests/images
+GUEST_IMAGES := \
+	$(GUEST_DIR)/guest-1/qnx800-guest-1.ifs \
+	$(GUEST_DIR)/guest-1/qnx-guest-1.qvmconf \
+	$(GUEST_DIR)/guest-2/qnx800-guest-2.ifs \
+	$(GUEST_DIR)/guest-2/qnx-guest-2.qvmconf
+
+# Safety net for host-only builds: materialize a guest IFS if it's missing by
+# delegating to its own Makefile. (Staleness of an existing IFS is handled by the
+# guest build itself; `make` at the repo root also builds qnx_guests before qnx_host.)
+$(GUEST_DIR)/guest-1/qnx800-guest-1.ifs:
+	$(MAKE) -C $(GUEST_DIR)/guest-1
+$(GUEST_DIR)/guest-2/qnx800-guest-2.ifs:
+	$(MAKE) -C $(GUEST_DIR)/guest-2
+
+part_qnx_data.img: part_qnx_data.build $(GUEST_IMAGES)
 	@echo "Creating QNX data image: $@ from prerequisite: $<"
 	# Create the QNX6 partition image for data storage
 	mkqnx6fsimg -vv $< $@
