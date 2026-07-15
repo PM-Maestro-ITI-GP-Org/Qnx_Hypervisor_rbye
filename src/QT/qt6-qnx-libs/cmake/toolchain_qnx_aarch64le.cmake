@@ -30,3 +30,11 @@ set(CMAKE_NM      $ENV{QNX_HOST}/usr/bin/ntoaarch64-nm)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
+# QNX 8.0 ships eventfd()/eventfd_read()/eventfd_write() in a standalone
+# libeventfd.so (on Linux these live in libc). Qt6Core references them, so
+# link libeventfd into every target or the QNX build fails at link time with
+# "undefined reference to `eventfd'".
+string(APPEND CMAKE_EXE_LINKER_FLAGS_INIT    " -leventfd")
+string(APPEND CMAKE_SHARED_LINKER_FLAGS_INIT " -leventfd")
+string(APPEND CMAKE_MODULE_LINKER_FLAGS_INIT " -leventfd")

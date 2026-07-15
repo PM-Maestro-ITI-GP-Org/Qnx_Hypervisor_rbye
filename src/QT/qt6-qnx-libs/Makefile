@@ -1,56 +1,53 @@
-WORK_DIR := /media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/QT/qt6-qnx-libs
-SCRIPTS_DIR := $(WORK_DIR)/scripts
-QT6_OUTPUT_DIR := /media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/QT/qt6-qnx-libs/output_dir
-QT6_WORKING_DIR := /media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/QT/qt6-qnx-libs/work_dir
-QT6_SOURCE_DIR := /media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/QT/qt6-qnx-libs/qt6-source
-QT6_QNX_ENV ?= /media/gemy/Linux_Workspace/ITI/QNX_WS/software_platform/qnxsdp-env.sh
+# All paths are relative to this Makefile's directory
+# No hardcoded absolute paths — project is fully relocatable
 
-export QT6_OUTPUT_DIR
-export QT6_WORKING_DIR
-export QT6_SOURCE_DIR
-export QT6_QNX_ENV
+QT6_QNX_ENV ?= ../../../qnx800/qnxsdp-env.sh
+
+# Keep build.sh's output dir in sync with the path the Makefile / Demo_APP look in.
+QT6_OUTPUT_DIR ?= $(CURDIR)/output_dir
+
+export QT6_QNX_ENV QT6_OUTPUT_DIR
 
 .PHONY: all config download build rebuild status
 
 all: download build
 
 download:
-	@if ls "$(QT6_OUTPUT_DIR)"/lib/libQt6Core.so* >/dev/null 2>&1; then \
+	@if ls output_dir/lib/libQt6Core.so* >/dev/null 2>&1; then \
 		echo "Qt already built, nothing to do"; \
-	elif [ -d "$(QT6_SOURCE_DIR)/qtbase" ]; then \
+	elif [ -d qt6-source/qtbase ]; then \
 		echo "source already extracted, skipping download"; \
 	else \
-		bash $(SCRIPTS_DIR)/download.sh; \
+		bash scripts/download.sh; \
 	fi
 
 rebuild:
-	rm -rf $(QT6_WORKING_DIR) $(QT6_OUTPUT_DIR)
-	bash $(SCRIPTS_DIR)/build.sh
+	QT6_FORCE_REBUILD=1 bash scripts/build.sh
 
 config:
-	@if [ ! -d "$(QT6_SOURCE_DIR)/qtbase" ]; then \
+	@if [ ! -d qt6-source/qtbase ]; then \
 		echo "source not found — run 'make download' first"; exit 1; \
 	fi
-	bash $(SCRIPTS_DIR)/configure.sh
+	bash scripts/configure.sh
 
 build:
-	@[ -f "$(WORK_DIR)/.build-config" ] || { echo "no .build-config — run 'make config' first"; exit 1; }
-	@if ls "$(QT6_OUTPUT_DIR)"/lib/libQt6Core.so* >/dev/null 2>&1; then \
-		echo "Qt already built at $(QT6_OUTPUT_DIR), skipping build"; \
+	@[ -f ".build-config" ] || { echo "==> no .build-config, generating default preset (run 'make config' to customize)"; bash scripts/configure.sh --preset default; }
+	@if ls output_dir/lib/libQt6Core.so* >/dev/null 2>&1; then \
+		echo "Qt already built at output_dir, skipping build"; \
 		echo "run 'make rebuild' to force a rebuild"; \
 	else \
-		if [ ! -d "$(QT6_SOURCE_DIR)/qtbase" ]; then \
+		if [ ! -d qt6-source/qtbase ]; then \
 			echo "source not found — run 'make download' first"; exit 1; \
 		fi; \
-		bash $(SCRIPTS_DIR)/build.sh; \
+		bash scripts/build.sh; \
 	fi
 
 status:
-	@echo "WORK_DIR      = $(WORK_DIR)"
-	@echo "OUTPUT_DIR    = $(QT6_OUTPUT_DIR)"
-	@echo "WORKING_DIR   = $(QT6_WORKING_DIR)"
-	@echo "SOURCE_DIR    = $(QT6_SOURCE_DIR)"
+	@echo "OUTPUT_DIR    = output_dir"
+	@echo "WORKING_DIR   = work_dir"
+	@echo "SOURCE_DIR    = qt6-source"
+	@echo "QNX_ENV       = $(QT6_QNX_ENV)"
 	@echo "QNX_HOST      = $(QNX_HOST)"
 	@echo "QNX_TARGET    = $(QNX_TARGET)"
 	@echo ""
-	@cat "$(WORK_DIR)/.build-config" 2>/dev/null || echo "no .build-config"
+	@cat ".build-config" 2>/dev/null || echo "no .build-config"

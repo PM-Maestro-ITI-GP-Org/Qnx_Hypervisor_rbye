@@ -122,13 +122,22 @@ step1_build_host_qt() {
 
 step2_build_qnx_qt() {
     print_info "=== Step 2: Cross-compile Qt for QNX ==="
-    rm -rf "${QNX_BUILD_DIR}"
-    # Clean previous QNX install output but preserve host_qt (needed for QT_HOST_PATH)
-    if [ -d "${OUTPUT_DIR}" ]; then
-        for item in "${OUTPUT_DIR}"/*; do
-            [ "$(basename "$item")" = "host_qt" ] && continue
-            rm -rf "$item"
-        done
+
+    # Incremental by default: keep build/qnx so ninja skips up-to-date targets and
+    # resumes after a failed/interrupted run instead of recompiling ~4600 targets.
+    # Only wipe on an explicit force (make rebuild / QT6_FORCE_REBUILD=1).
+    if [ -n "${QT6_FORCE_REBUILD:-}" ]; then
+        print_info "Force rebuild: wiping ${QNX_BUILD_DIR} and QNX install output."
+        rm -rf "${QNX_BUILD_DIR}"
+        # Clean previous QNX install output but preserve host_qt (needed for QT_HOST_PATH)
+        if [ -d "${OUTPUT_DIR}" ]; then
+            for item in "${OUTPUT_DIR}"/*; do
+                [ "$(basename "$item")" = "host_qt" ] && continue
+                rm -rf "$item"
+            done
+        fi
+    elif [ -f "${QNX_BUILD_DIR}/CMakeCache.txt" ]; then
+        print_info "Resuming incremental QNX build in ${QNX_BUILD_DIR} (set QT6_FORCE_REBUILD=1 to force a clean rebuild)."
     fi
     mkdir -p "${QNX_BUILD_DIR}"
 
