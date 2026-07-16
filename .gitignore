@@ -38,15 +38,17 @@ src/giga_spi_8adc/build/
 src/oss_*/*.tar.xz
 src/oss_*/*/
 src/shm_sender/build/
-src/libepoxy/build-qnx
-src/virglrenderer/build-qnx
+src/gpu/libepoxy/build-qnx
+src/gpu/virglrenderer/build-qnx
+src/gpu/virglrenderer/patch-applied.stamp
+src/gpu/vdev-virtio-gpu/vdev-virtio-gpu.so
 src/*/build/
 src/*/build_*/
 src/*/build-*/
 src/*/*/build*/
 src/QT/qt6-qnx-libs/qt6-source
 src/QT/qt6-qnx-libs/*.tar.xz
-src/stage
+src/gpu/stage
 src/QT/qt6-qnx-libs/output_dir/host_qt
 src/QT/qt6-qnx-libs/output_dir/
 

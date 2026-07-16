@@ -669,13 +669,15 @@ idle_insert=1
 
 /lib/dll/libpci_mux.so=libpci_mux.so
 /lib/dll/libpci_mux.so.1.0=libpci_mux.so.1.0
-/lib/dll/vdev-virtio-gpu.so=../../src/vdev-virtio-gpu/vdev-virtio-gpu.so
-/lib/dll/libvirglrenderer.so=../../src/virglrenderer/build-qnx/src/libvirglrenderer.so
-/lib/dll/libvirglrenderer.so.1=../../src/virglrenderer/build-qnx/src/libvirglrenderer.so.1
-/lib/dll/libvirglrenderer.so.1.11.0=../../src/virglrenderer/build-qnx/src/libvirglrenderer.so.1.11.0
-/lib/dll/libepoxy.so=../../src/libepoxy/build-qnx/src/libepoxy.so
-/lib/dll/libepoxy.so.0=../../src/libepoxy/build-qnx/src/libepoxy.so.0
-/lib/dll/libepoxy.so.0.0.0=../../src/libepoxy/build-qnx/src/libepoxy.so.0.0.0
+# GPU: the vdev + its virgl/epoxy deps. All three live under src/gpu/ (submodules);
+# build them with `make -C src` (src/build-deps.sh stages virgl/epoxy, then the vdev).
+/lib/dll/vdev-virtio-gpu.so=../../src/gpu/vdev-virtio-gpu/vdev-virtio-gpu.so
+/lib/dll/libvirglrenderer.so=../../src/gpu/virglrenderer/build-qnx/src/libvirglrenderer.so
+/lib/dll/libvirglrenderer.so.1=../../src/gpu/virglrenderer/build-qnx/src/libvirglrenderer.so.1
+/lib/dll/libvirglrenderer.so.1.11.0=../../src/gpu/virglrenderer/build-qnx/src/libvirglrenderer.so.1.11.0
+/lib/dll/libepoxy.so=../../src/gpu/libepoxy/build-qnx/src/libepoxy.so
+/lib/dll/libepoxy.so.0=../../src/gpu/libepoxy/build-qnx/src/libepoxy.so.0
+/lib/dll/libepoxy.so.0.0.0=../../src/gpu/libepoxy/build-qnx/src/libepoxy.so.0.0.0
 /lib/dll/ibeventfd.so.1=libeventfd.so.1
 /lib/dll/ibeventfd.so=libeventfd.so
 /lib/dll/libdrm.so.2=libdrm.so.2

@@ -2,7 +2,7 @@
 #
 # Bring up the paravirtual GPU inside the QNX guest (virtio-gpu over MMIO).
 #
-# Talks to the host-side vdev-virtio-gpu.so (see src/vdev-virtio-gpu/). No PCI:
+# Talks to the host-side vdev-virtio-gpu.so (see src/gpu/vdev-virtio-gpu/). No PCI:
 # drm-virtio attaches to the virtio-gpu on the MMIO transport, then QNX Screen
 # runs the Mesa virgl stack on top (guest GL -> SUBMIT_3D -> host virglrenderer).
 #

@@ -2,13 +2,13 @@
 #
 # Build + stage the vdev-virtio-gpu host-side dependencies and point the vdev at them.
 #
-#   libepoxy      (src/libepoxy)      -> build-qnx/src/libepoxy.so
-#   virglrenderer (src/virglrenderer) -> build-qnx/src/libvirglrenderer.so
-#   libscreen / libhypS               <- this repo's QNX SDP (qnx800/)
+#   libepoxy      (src/gpu/libepoxy)      -> build-qnx/src/libepoxy.so
+#   virglrenderer (src/gpu/virglrenderer) -> build-qnx/src/libvirglrenderer.so
+#   libscreen / libhypS                   <- this repo's QNX SDP (qnx800/)
 #
-# It assembles a self-contained stage dir (src/stage) with those libs + the pkg-config
-# and meson cross files the two meson builds need, then writes src/vdev-virtio-gpu/
-# paths.txt (VIRGL + STAGE) so `make -C vdev-virtio-gpu` links cleanly.
+# It assembles a self-contained stage dir (src/gpu/stage) with those libs + the pkg-config
+# and meson cross files the two meson builds need, then writes src/gpu/vdev-virtio-gpu/
+# paths.txt (VIRGL + STAGE) so `make -C gpu/vdev-virtio-gpu` links cleanly.
 #
 # Heavy meson builds run ONLY if their .so isn't present yet, and src/Makefile runs
 # this whole script behind a stamp (.deps-built.stamp) so it does NOT run on every
@@ -20,17 +20,19 @@ SRC_DIR="$(cd "$(dirname "$0")" && pwd)"          # .../src
 REPO="$(cd "$SRC_DIR/.." && pwd)"
 SDP_ENV="$REPO/qnx800/qnxsdp-env.sh"
 
-VIRGL="$SRC_DIR/virglrenderer"
-EPOXY="$SRC_DIR/libepoxy"
-STAGE="$SRC_DIR/stage"
+# All GPU submodules live under src/gpu/ (vdev-virtio-gpu, virglrenderer, libepoxy).
+GPU_DIR="$SRC_DIR/gpu"
+VIRGL="$GPU_DIR/virglrenderer"
+EPOXY="$GPU_DIR/libepoxy"
+STAGE="$GPU_DIR/stage"
 CROSS="$SRC_DIR/qnx-aarch64le.ini"
-VDEV_PATHS="$SRC_DIR/vdev-virtio-gpu/paths.txt"
+VDEV_PATHS="$GPU_DIR/vdev-virtio-gpu/paths.txt"
 
 # --- fetch deps online (submodules) if a fresh clone hasn't checked them out -
 for sm in virglrenderer libepoxy; do
-  if [ ! -f "$SRC_DIR/$sm/meson.build" ]; then
+  if [ ! -f "$GPU_DIR/$sm/meson.build" ]; then
     echo "==> fetching $sm (git submodule update --init)"
-    git -C "$REPO" submodule update --init "src/$sm"
+    git -C "$REPO" submodule update --init "src/gpu/$sm"
   fi
 done
 

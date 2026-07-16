@@ -1,22 +1,25 @@
 # Host-side deps for vdev-virtio-gpu (libepoxy + virglrenderer) are built + staged
-# ONCE by build-deps.sh, which also writes vdev-virtio-gpu/paths.txt. It's guarded by
-# a stamp so it does NOT run on every `make`. Force a re-stage/rebuild with:
+# ONCE by build-deps.sh, which also writes gpu/vdev-virtio-gpu/paths.txt. It's guarded
+# by a stamp so it does NOT run on every `make`. Force a re-stage/rebuild with:
 #   make deps-clean && make          (or: rm .deps-built.stamp)
 DEPS_STAMP := .deps-built.stamp
 
-# These are handled by build-deps.sh, so the generic loop below skips them.
-DEP_DIRS = libepoxy virglrenderer
+# All GPU submodules live under gpu/ (vdev-virtio-gpu, virglrenderer, libepoxy).
+# libepoxy/virglrenderer are built by build-deps.sh and the vdev is built explicitly
+# below, so the generic app loop skips the whole gpu/ dir.
+GPU_DIR = gpu
+SKIP_DIRS = $(GPU_DIR)
 
 .PHONY: all clean deps deps-clean
 
-# Build order: deps (stamp) -> vdev-virtio-gpu (needs paths.txt) -> every other app dir.
+# Build order: deps (stamp) -> gpu/vdev-virtio-gpu (needs paths.txt) -> other app dirs.
 all: $(DEPS_STAMP)
 	@set -e; \
-	echo "==> Building vdev-virtio-gpu"; \
-	$(MAKE) -C vdev-virtio-gpu; \
+	echo "==> Building $(GPU_DIR)/vdev-virtio-gpu"; \
+	$(MAKE) -C $(GPU_DIR)/vdev-virtio-gpu; \
 	for dir in */; do \
-		dir=$$(echo $$dir | tr -d /); \
-		case " $(DEP_DIRS) vdev-virtio-gpu " in *" $$dir "*) continue ;; esac; \
+		dir=$${dir%/}; \
+		case " $(SKIP_DIRS) " in *" $$dir "*) continue ;; esac; \
 		if [ -f "$$dir/Makefile" ] || [ -f "$$dir/GNUmakefile" ]; then \
 			echo "==> Building $$dir"; \
 			$(MAKE) -C "$$dir"; \
@@ -33,14 +36,16 @@ $(DEPS_STAMP): build-deps.sh
 deps-clean:
 	rm -f $(DEPS_STAMP)
 
+# Clean the gpu/ submodules explicitly (they're nested, so the plain */ glob misses
+# them), then every other app dir.
 clean:
 	@set -e; \
-	for dir in */; do \
-		dir=$$(echo $$dir | tr -d /); \
+	for dir in $(GPU_DIR)/*/ */; do \
+		dir=$${dir%/}; \
 		if [ -f "$$dir/Makefile" ] || [ -f "$$dir/GNUmakefile" ]; then \
 			echo "==> Cleaning $$dir"; \
 			$(MAKE) -C "$$dir" clean || true; \
 		fi; \
 	done
 	rm -f $(DEPS_STAMP) qnx-aarch64le.ini
-	rm -rf stage
+	rm -rf $(GPU_DIR)/stage
