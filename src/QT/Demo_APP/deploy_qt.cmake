@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+cmake_policy(SET CMP0009 NEW)
 # deploy_qt.cmake — deploy only the needed Qt + system dependencies
 # Usage: cmake -DBIN=... -DQT_LIB_DIR=... -DDEPLOY_LIB_DIR=...
 #              -DQT_QML_DIR=... -DDEPLOY_QML_DIR=...
@@ -95,14 +97,22 @@ foreach(_mod QtQuick QtQuick.Controls QtQml)
 endforeach()
 
 # ============================================
-# 5. Fonts (at least one .ttf for text rendering)
+# 5. Fonts (read fonts.txt, copy from FONT_SOURCE_DIR)
 # ============================================
-if(DEFINED PROJ_SOURCE_DIR)
+if(DEFINED PROJ_SOURCE_DIR AND DEFINED FONT_SOURCE_DIR)
     file(MAKE_DIRECTORY ${DEPLOY_FONTS_DIR})
-    file(GLOB _fonts "${PROJ_SOURCE_DIR}/fonts/*.ttf" "${PROJ_SOURCE_DIR}/fonts/*.ttc")
-    if(_fonts)
-        file(COPY ${_fonts} DESTINATION ${DEPLOY_FONTS_DIR})
-        message(STATUS "Deployed fonts from ${PROJ_SOURCE_DIR}/fonts/")
+    set(_fonts_txt "${PROJ_SOURCE_DIR}/fonts.txt")
+    if(EXISTS "${_fonts_txt}")
+        file(STRINGS "${_fonts_txt}" _font_list)
+        foreach(_font ${_font_list})
+            file(GLOB_RECURSE _matches "${FONT_SOURCE_DIR}/${_font}")
+            if(_matches)
+                file(COPY ${_matches} DESTINATION ${DEPLOY_FONTS_DIR})
+                message(STATUS "Deployed font: ${_font}")
+            else()
+                message(WARNING "Font not found: ${_font} in ${FONT_SOURCE_DIR}")
+            endif()
+        endforeach()
     endif()
 endif()
 
