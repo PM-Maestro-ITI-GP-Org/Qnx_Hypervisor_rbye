@@ -3,10 +3,12 @@
 
 QT6_QNX_ENV ?= ../../../qnx800/qnxsdp-env.sh
 
-# Keep build.sh's output dir in sync with the path the Makefile / Demo_APP look in.
+# Keep build.sh's dirs in sync with the paths the Makefile / Demo_APP look in.
 QT6_OUTPUT_DIR ?= $(CURDIR)/output_dir
+QT6_WORKING_DIR ?= $(CURDIR)/work_dir
+QT6_SOURCE_DIR ?= $(CURDIR)/qt6-source
 
-export QT6_QNX_ENV QT6_OUTPUT_DIR
+export QT6_QNX_ENV QT6_OUTPUT_DIR QT6_WORKING_DIR QT6_SOURCE_DIR
 
 .PHONY: all config download build rebuild status
 
@@ -43,11 +45,11 @@ build:
 	fi
 
 status:
-	@echo "OUTPUT_DIR    = output_dir"
-	@echo "WORKING_DIR   = work_dir"
-	@echo "SOURCE_DIR    = qt6-source"
-	@echo "QNX_ENV       = $(QT6_QNX_ENV)"
-	@echo "QNX_HOST      = $(QNX_HOST)"
-	@echo "QNX_TARGET    = $(QNX_TARGET)"
+	@echo "QT6_SOURCE_DIR    = $(QT6_SOURCE_DIR)"
+	@echo "QT6_OUTPUT_DIR    = $(QT6_OUTPUT_DIR)"
+	@echo "QT6_WORKING_DIR   = $(QT6_WORKING_DIR)"
+	@echo "QT6_QNX_ENV       = $(QT6_QNX_ENV)"
+	@echo "QNX_HOST          = $(QNX_HOST)"
+	@echo "QNX_TARGET        = $(QNX_TARGET)"
 	@echo ""
 	@cat ".build-config" 2>/dev/null || echo "no .build-config"
