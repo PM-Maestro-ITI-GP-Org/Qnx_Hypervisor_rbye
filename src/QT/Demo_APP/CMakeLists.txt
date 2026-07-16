@@ -45,6 +45,7 @@ set(QNX_TARGET "$ENV{QNX_TARGET}" CACHE PATH "QNX target sysroot")
 set(QNX_ARCH "aarch64le" CACHE STRING "QNX target architecture")
 set(QNX_LIB_DIR "${QNX_TARGET}/${QNX_ARCH}" CACHE PATH "QNX arch root directory")
 set(QT6_PLUGIN_DIR "${QT6_PREFIX}/plugins" CACHE PATH "Qt6 plugins directory")
+set(FONT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../qt6-qnx-libs/fonts" CACHE PATH "Directory containing font files")
 
 # ============================================
 # Application Source Files
@@ -85,6 +86,7 @@ add_custom_command(TARGET QtQuick2DDemo POST_BUILD
         -DQT_PLUGIN_DIR=${QT6_PLUGIN_DIR}
         -DDEPLOY_PLUGIN_DIR=${DEPLOY_PLUGIN_DIR}
         -DDEPLOY_FONTS_DIR=${DEPLOY_FONTS_DIR}
+        -DFONT_SOURCE_DIR=${FONT_SOURCE_DIR}
         -DQNX_LIB_DIR=${QNX_LIB_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/deploy_qt.cmake
     COMMENT "Deploying minimal Qt dependencies to ${QT_DEPLOY_DIR}"
@@ -100,6 +102,7 @@ export LD_LIBRARY_PATH=\"$DIR/lib:$LD_LIBRARY_PATH\"
 export QML2_IMPORT_PATH=\"$DIR/qml\"
 export QT_QPA_PLATFORM_PLUGIN_PATH=\"$DIR/plugins\"
 export QT_QUICK_BACKEND=\"software\"
+export QQNX_PHYSICAL_SCREEN_SIZE=\"\${QQNX_PHYSICAL_SCREEN_SIZE:-150,90}\"
 export APP_WIDTH=\"\${APP_WIDTH:-1280}\"
 export APP_HEIGHT=\"\${APP_HEIGHT:-720}\"
 exec \"$DIR/QtQuick2DDemo\" \"\$@\"

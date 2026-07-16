@@ -17,7 +17,8 @@ qnx:
 			-DCMAKE_BUILD_TYPE=Release \
 			-DCMAKE_TOOLCHAIN_FILE=$(QT6_DIR)/lib/cmake/Qt6/qt.toolchain.cmake \
 			-DQt6_DIR=$(QT6_DIR)/lib/cmake/Qt6 \
-			-DQNX_LIB_DIR=$(QNX800_DIR)/target/qnx/aarch64le; \
+			-DQNX_LIB_DIR=$(QNX800_DIR)/target/qnx/aarch64le \
+			-DFONT_SOURCE_DIR=/usr/share/fonts; \
 		cmake --build build_qnx'
 
 rebuild: clean qnx
