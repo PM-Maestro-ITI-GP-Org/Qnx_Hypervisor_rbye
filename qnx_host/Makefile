@@ -50,5 +50,6 @@ images:
 	$(MAKE) -Cimages
 
 prebuilt:
+	mkdir -p install
 	cp -rf prebuilt/* install
 
