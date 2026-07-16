@@ -18,7 +18,6 @@ all: build
 
 build:
 	@if [ "${FORCE_REBUILD:-0}" != "1" ] \
-	    && [ -f build-rpi/.commonapi-qnx-build-complete ] \
 	    && [ -f build-rpi/toolchain.cmake ] \
 	    && [ -d build-rpi/generators/core ] \
 	    && [ -d build-rpi/generators/someip ] \
