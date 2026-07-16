@@ -781,7 +781,7 @@ io 32 0x1C0F0008 0
 ################################################################################################
 # this process is just cli command that direct access the hw
 /sbin/gpio-bcm2711=gpio-bcm2711
-/bin/gpio-rp1=../../../qnx_host/install/aarch64le/bin/gpio-rp1
+/bin/gpio-rp1=../../../qnx_host/prebuilt/aarch64le/bin/gpio-rp1
 # this is the resource manager which visualize the /dev/gpio to access the gpio pins using files instead of msg passing (server)
 /sbin/rpi-gpio=../../../src/rpi-gpio/build/resmgr/rpi_gpio
 
@@ -875,8 +875,8 @@ spi_loopback=../../../src/spi_loopback/spi_loopback
 motor_controller=../../../src/giga_spi_8adc/build/motor_controller
 config.json=../../../src/giga_spi_8adc/config.json
 ########################################################################
-/sbin/spi-dwc=../../../qnx_host/install/aarch64le/sbin/spi-dwc
-/sbin/msix-rp1=../../../qnx_host/install/aarch64le/bin/msix-rp1
+/sbin/spi-dwc=../../../qnx_host/prebuilt/aarch64le/sbin/spi-dwc
+/sbin/msix-rp1=../../../qnx_host/prebuilt/aarch64le/bin/msix-rp1
 ########################################################################
 
 
