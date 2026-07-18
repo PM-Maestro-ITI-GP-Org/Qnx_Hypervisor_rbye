@@ -227,6 +227,41 @@ Service discovery uses multicast `224.244.224.245:30491`.
 
 ---
 
+## 8. Submodule patches
+
+The submodules listed below contain local build‑infrastructure commits that could not
+be pushed to their upstream remotes. Patches are stored in `patches/` and automatically
+applied by `make` before every build.
+
+| Submodule path | Patch file | Applied commits |
+|---|---|---|
+| `src/qt_cluster` | `patches/qt_cluster/qt_cluster.patch` | Build files (Makefile, CMakeLists.txt, deploy) |
+| `src/motor_data_producer` | `patches/motor_data_producer/spi_stm32.patch` | Build files (Makefile, QNX-SPI/ cmake + makefiles) |
+
+### How it works
+
+1. `make` → `all` depends on `apply-patches`
+2. For each submodule listed in `PATCHED_SUBMODULES`, it runs
+   `git submodule update --init` then `git am --3way patches/<name>/*.patch`
+3. If a patch is already applied (`git am` fails) it is silently skipped
+
+### Regenerating patches
+
+If you modify a patched submodule and want to update the patch:
+
+```sh
+cd src/qt_cluster && git format-patch --stdout <base-commit>..HEAD \
+  > ../../patches/qt_cluster/qt_cluster.patch
+
+cd src/motor_data_producer && git format-patch --stdout <base-commit>..HEAD \
+  > ../../patches/motor_data_producer/spi_stm32.patch
+```
+
+Where `<base-commit>` is the upstream HEAD (run `git log --oneline origin/main`
+from inside the submodule to find it).
+
+---
+
 ## 9. Adding a new application to `src/`
 
 **Step 1 — create the app.** Make `src/<myapp>/` with your sources and a `Makefile` that
