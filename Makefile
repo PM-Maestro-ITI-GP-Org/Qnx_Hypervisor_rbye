@@ -1,7 +1,7 @@
 
 SUBDIRS := qnx_host qnx_guests src
 
-.PHONY: all clean $(SUBDIRS) qnx_install flash-sd apply-patches
+.PHONY: all clean $(SUBDIRS) qnx_install flash-sd submodules
 
 PROJECT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 CTI_QSC_URL ?= https://www.qnx.com/swcenter
@@ -21,32 +21,27 @@ endif
 
 
 
-all: apply-patches $(SUBDIRS)
+all: submodules $(SUBDIRS)
 
 qnx_host:  qnx_guests apps_src
 	$(MAKE) -C qnx_host
 
-apps_src: apply-patches
+apps_src: submodules
 	$(MAKE) -C src
 
 # -------------------------------------------------------------------
-# Submodule patches — local changes that cannot be pushed upstream.
-# Applied on top of `git submodule update --init` during every build.
+# Submodule initialisation — checks out the correct branch for app
+# submodules (others stay at the pinned commit).
 # -------------------------------------------------------------------
-PATCHED_SUBMODULES := src/qt_cluster src/motor_data_producer
+APP_SUBMODULES := src/qt_cluster src/motor_data_producer
 
-apply-patches:
-	@for mod in $(PATCHED_SUBMODULES); do \
-		name=$$(basename $$mod); \
-		git submodule update --init $$mod 2>/dev/null || true; \
-		(cd $$mod && \
-		 for p in ../../patches/$$name/*.patch; do \
-		   [ -f "$$p" ] || continue; \
-		   git am --3way "$$p" 2>/dev/null && echo "  [patch] $$name: applied $$p" || true; \
-		 done); \
+submodules:
+	@for mod in $(APP_SUBMODULES); do \
+		git submodule update --init --remote "$$mod" 2>/dev/null | \
+		  sed "s/^/  [submodule] /" || true; \
 	done
 
-.PHONY: apply-patches
+.PHONY: submodules
 
 qnx_install:
 

@@ -227,38 +227,36 @@ Service discovery uses multicast `224.244.224.245:30491`.
 
 ---
 
-## 8. Submodule patches
+## 8. Submodule branches
 
-The submodules listed below contain local build‑infrastructure commits that could not
-be pushed to their upstream remotes. Patches are stored in `patches/` and automatically
-applied by `make` before every build.
+The two application submodules track remote branches instead of pinned commits.
+This lets you push changes to those branches and have builds pick them up
+automatically without updating the parent repo's commit pointer.
 
-| Submodule path | Patch file | Applied commits |
+| Submodule path | Remote branch | Purpose |
 |---|---|---|
-| `src/qt_cluster` | `patches/qt_cluster/qt_cluster.patch` | Build files (Makefile, CMakeLists.txt, deploy) |
-| `src/motor_data_producer` | `patches/motor_data_producer/spi_stm32.patch` | Build files (Makefile, QNX-SPI/ cmake + makefiles) |
+| `src/qt_cluster` | `qt_qnx_build` | Build files (Makefile, CMakeLists.txt, deploy) for the Qt cluster app |
+| `src/motor_data_producer` | `spi_qnx_build` | Build files (Makefile, QNX-SPI/ cmake + makefiles) for the SPI producer |
 
 ### How it works
 
-1. `make` → `all` depends on `apply-patches`
-2. For each submodule listed in `PATCHED_SUBMODULES`, it runs
-   `git submodule update --init` then `git am --3way patches/<name>/*.patch`
-3. If a patch is already applied (`git am` fails) it is silently skipped
+1. `make` → `all` depends on `submodules`
+2. For each submodule listed in `APP_SUBMODULES`, it runs
+   `git submodule update --init --remote <path>`
+3. `--remote` checks out the **latest** commit from the configured branch
+   instead of the pinned commit in the parent index
 
-### Regenerating patches
+### Updating a submodule
 
-If you modify a patched submodule and want to update the patch:
+Push new commits to the tracked branch on GitHub; the next build will pull them:
 
 ```sh
-cd src/qt_cluster && git format-patch --stdout <base-commit>..HEAD \
-  > ../../patches/qt_cluster/qt_cluster.patch
+cd src/qt_cluster
+git push origin qt_qnx_build
 
-cd src/motor_data_producer && git format-patch --stdout <base-commit>..HEAD \
-  > ../../patches/motor_data_producer/spi_stm32.patch
+cd src/motor_data_producer
+git push origin spi_qnx_build
 ```
-
-Where `<base-commit>` is the upstream HEAD (run `git log --oneline origin/main`
-from inside the submodule to find it).
 
 ---
 
