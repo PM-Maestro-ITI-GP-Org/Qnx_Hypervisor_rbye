@@ -94,10 +94,11 @@
     qconn
 
 
-    # Assign a static IP address for the guest-to-guest device, for this example, the convention is:
-    #  guest 1 address: 192.168.10.1/24
-    #  subsequent guests use the next address available e.g.: 192.168.10.2/24
-    ifconfig vtnet1 192.168.10.2/24
+    # Assign static IP addresses:
+    #   Guest 2 vtnet0 (↔ Host):       10.0.3.1/24
+    #   Guest 2 vtnet1 (↔ Guest 1):    10.0.2.2/24
+    ifconfig vtnet0 10.0.3.1/24
+    ifconfig vtnet1 10.0.2.2/24
 
 
 
@@ -125,6 +126,10 @@
     display_msg ""
 
 
+
+    display_msg "Starting motor_ai_server..."
+    #ksh -c "export VSOMEIP_CONFIGURATION=/Motor_AI_Server/vsomeip.json; /Motor_AI_Server/motor_ai_server" &
+    
     ############################################################################################
     ## Start the main shell
     ############################################################################################
@@ -752,3 +757,9 @@ io 32 0x1C0F0008 0
 HelloWorldService =../../../src/someip/commonapi_client_server/server/build/HelloWorldService
 vsomeip_server.json =../../../src/someip/commonapi_client_server/server/vsomeip_server_mc.json
 lib/ =../../../src/someip/commonapi-qnx/build-rpi/lib
+
+/Motor_AI_Server/motor_ai_server=../../../src/motor_ai_server/server/build/MotorDataService
+/Motor_AI_Server/vsomeip.json=../../../src/motor_ai_server/server/vsomeip_multicast.json
+/etc/commonapi.ini=../../../src/motor_ai_server/interface/commonapi4someip.ini
+/etc/commonapi4someip.ini=../../../src/motor_ai_server/interface/commonapi4someip.ini
+
