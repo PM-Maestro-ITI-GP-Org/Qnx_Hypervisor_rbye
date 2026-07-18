@@ -7,3 +7,9 @@
 [submodule "src/gpu/libepoxy"]
 	path = src/gpu/libepoxy
 	url = https://github.com/maxmaster55/QNX_libepoxy.git
+[submodule "src/motor_data_producer"]
+	path = src/motor_data_producer
+	url = https://github.com/Mintharah/SPI-Stm32-QNX.git
+[submodule "src/qt_cluster"]
+	path = src/qt_cluster
+	url = https://github.com/Mintharah/Cluster-Qt6.git
