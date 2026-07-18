@@ -14,10 +14,17 @@ export QNX_SDP_PATH
 
 .PHONY: all download patch build clean
 
+# Expanded by make (not the shell) below. Written as ${FORCE_REBUILD:-0} inside the
+# recipe this never worked: make parses that as a variable literally named
+# "FORCE_REBUILD:-0" (a substitution reference needs an '='), so it always expanded
+# to empty and FORCE_REBUILD=1 had no effect. The artifact checks below are sound,
+# so this only ever broke the manual override, not ordinary builds.
+FORCE_REBUILD ?= 0
+
 all: build
 
 build:
-	@if [ "${FORCE_REBUILD:-0}" != "1" ] \
+	@if [ "$(FORCE_REBUILD)" != "1" ] \
 	    && [ -f build-rpi/toolchain.cmake ] \
 	    && [ -d build-rpi/generators/core ] \
 	    && [ -d build-rpi/generators/someip ] \
