@@ -6,20 +6,21 @@ A simple 2D animation demo with bouncing shapes, text display, and interactive i
 
 ## How it works
 
-- **`CMakeLists.txt`** — builds the app binary, then runs `deploy_qt.cmake` as a post-build step
-- **`deploy_qt.cmake`** — copies only the required dependencies into the `deploy/` directory:
-  - Qt libs from `../qt6-qnx-libs/output_dir/lib/`
-  - System libs from the QNX SDK (`qnx800/target/qnx/aarch64le/lib/` and `usr/lib/`)
-  - QNX platform plugin (`libqqnx.so`)
-  - QML modules (`QtQuick`, `QtQml`)
-   - Fonts listed in `fonts.txt` from `FONT_SOURCE_DIR` (defaults to `/usr/share/fonts`, searched recursively)
-  - Removes broken symlinks after copying
+**`CMakeLists.txt`** — builds the app binary, then runs `deploy_qt.cmake` as a post-build step.
 
-The result is a self-contained `deploy/` folder with everything needed to run on the QNX device.
+**`deploy_qt.cmake`** produces a self-contained `deploy/` directory with only the required dependencies:
+
+1. **QNX platform plugin** — `libqqnx.so` from Qt plugins
+2. **QML modules** — `QtQuick`, `QtQml`, `QtQuick.Controls` from Qt qml dir
+3. **Fonts** — reads `fonts.txt`, finds each font in `FONT_SOURCE_DIR`, copies to `deploy/lib/fonts/`, then generates a minimal `fonts.conf`
+4. **Recursive dependency resolution** — walks the app binary + every `.so` in `lib/`, `qml/`, `plugins/`, reads `NEEDED` entries via `objdump`/`readelf`, and pulls any missing libs from the Qt lib dir / QNX SDK. Repeats until the dependency set is closed. This auto-discovers all required Qt and system libs — no hardcoded lists.
+5. **Broken symlink cleanup** — removes dangling symlinks so the image builder won't fail
+
+The result is a lean, closed set of dependencies with no static `.a` or symbol `.sym` files.
 
 ### Fonts
 
-Fonts listed in `fonts.txt` are copied from `FONT_SOURCE_DIR` (recursive search — finds fonts in nested subdirectories). Defaults to `/usr/share/fonts`.
+Fonts listed in `fonts.txt` are copied from `FONT_SOURCE_DIR` (recursive search — finds fonts in nested subdirectories). Defaults to `/usr/share/fonts`. A minimal `fonts.conf` is generated so fontconfig doesn't complain at runtime.
 
 ```bash
 # Use system fonts (default)
