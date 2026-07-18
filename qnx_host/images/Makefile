@@ -42,9 +42,49 @@ all: ifs-$(BOARD)-hyp.bin disk.img
 # 	$(HOST_MKI) -a $(IMAGE_LOAD_ADDR) -A arm64 $^ $@
 	
 # Hypervisor (Hyp) Image Target
-ifs-$(BOARD)-hyp.bin: $(BOARD)-hypervisor.build
+#
+# Track everything the image is built from, the same way qnx_guests/images/common.mk
+# does. Depending on the .build file alone meant a rebuilt vdev/driver/app never made
+# it into the image: make saw the .build file unchanged, declared ifs-$(BOARD)-hyp.bin
+# up to date, and the change only showed up after a clean.
+#  - IFS_EXT_DEPS: in-repo sources the .build stages by relative path (../../src/...,
+#    ../../conf/...). ${...}/bare-name/SDP sources are skipped, as are comments.
+#  - IFS_INSTALL_DEPS: the install/ tree that mkifs pulls in via -r$(INSTALL).
+HYP_BUILD := $(BOARD)-hypervisor.build
+IFS_EXT_SRCS := $(sort $(shell grep -vE '^[[:space:]]*#' $(HYP_BUILD) 2>/dev/null | grep -oE '=[[:space:]]*\.\./[^ ]+[[:space:]]*$$' | sed -E 's/^=[[:space:]]*//; s/[[:space:]]+$$//' | grep -v '[$$][{]'))
+
+# Directory sources expand to the files inside them — a directory's mtime is bumped
+# whenever anything is re-copied into it, which would rebuild the image every run.
+IFS_EXT_DEPS := $(foreach f,$(IFS_EXT_SRCS),\
+                  $(if $(wildcard $(f)/.),$(shell find $(f) -type f 2>/dev/null),$(wildcard $(f))))
+# $(strip) matters: foreach joins its results with spaces, so with nothing missing
+# this would be a whitespace-only string, which "ifneq (...,)" reads as non-empty.
+IFS_MISSING  := $(strip $(foreach f,$(IFS_EXT_SRCS),$(if $(wildcard $(f)),,$(f))))
+IFS_INSTALL_DEPS := $(shell find $(INSTALL) -type f 2>/dev/null)
+
+# These are timestamp triggers built elsewhere, never here. The empty recipe stops
+# make from hunting for a built-in implicit rule to "remake" them — meson leaves a
+# libepoxy.so.0.0.0.p directory beside libepoxy.so.0.0.0, which matches the built-in
+# Pascal rule (%: %.p) and made make try to run a nonexistent `pc`.
+# $(sort) dedupes: a .build may stage the same source file at two image paths.
+$(sort $(IFS_EXT_DEPS) $(IFS_INSTALL_DEPS)): ;
+
+# A missing source is deliberately not a prerequisite, so an already-built image would
+# otherwise be reported "up to date" with no hint that a staged file has gone away.
+ifneq ($(IFS_MISSING),)
+$(warning $(HYP_BUILD) stages files that do not exist: $(IFS_MISSING))
+endif
+
+# $< (not $^) — the extra prerequisites above are change triggers, not mkifs inputs.
+ifs-$(BOARD)-hyp.bin: $(HYP_BUILD) $(IFS_EXT_DEPS) $(IFS_INSTALL_DEPS)
+ifneq ($(IFS_MISSING),)
+	@echo "ERROR: $(HYP_BUILD) stages files that have not been built:" >&2
+	@for f in $(IFS_MISSING); do echo "         $$f" >&2; done
+	@echo "       Build them first (e.g. 'make -C ../../src'), then re-run." >&2
+	@exit 1
+endif
 	@echo "Creating image: $@ from build file: $<"
-	$(HOST_MKIFS) -v -r$(INSTALL) $(MKIFSFLAGS) $^ $@
+	$(HOST_MKIFS) -v -r$(INSTALL) $(MKIFSFLAGS) $< $@
 
 clean:
 	@echo "Cleaning generated files for $(BOARD)"

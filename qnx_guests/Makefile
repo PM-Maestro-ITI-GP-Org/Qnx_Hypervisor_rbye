@@ -49,7 +49,10 @@ make_links:
 images:
 	$(MAKE) -Cimages
 
+# --preserve=timestamps: this target is phony, so the copy re-runs on every build.
+# Without it every install/ file got stamped with the current time, which made the
+# guest IFS unconditionally out of date and rebuilt on every single `make`.
 prebuilt:
 	mkdir -p install
-	cp -rf prebuilt/* install
+	cp -rf --preserve=timestamps prebuilt/* install
 
