@@ -184,7 +184,50 @@ Only **host IFS** changes require rebuilding `disk.img` and reflashing.
 
 ---
 
-## 7. Adding a new application to `src/`
+## 7. Network / IP layout
+
+Three subnets connect the host and two QNX guests over virtio-net:
+
+```
+          Host                        Guest 1                      Guest 2
+    ┌─────────────┐           ┌──────────────────┐          ┌──────────────────┐
+    │  10.0.1.2   │◄─vtnet0──►│  10.0.1.1        │          │                  │
+    │             │           │                  │          │                  │
+    │             │           │  10.0.2.1◄─vtnet1─┼──vtnet1─►10.0.2.2          │
+    │             │           │                  │          │                  │
+    │             │           │                  │          │  10.0.3.1◄─vtnet0─►10.0.3.2 Host
+    └─────────────┘           └──────────────────┘          └──────────────────┘
+```
+
+| Interface | Subnet | Host | Guest 1 | Guest 2 | Purpose |
+|---|---|---|---|---|---|
+| `vtnet0` | `10.0.1.0/24` | `10.0.1.2` | `10.0.1.1` | — | Host ↔ Guest 1 |
+| `vtnet1` | `10.0.2.0/24` | — | `10.0.2.1` | `10.0.2.2` | Guest 1 ↔ Guest 2 (SOME/IP) |
+| `vtnet0` (Guest 2) | `10.0.3.0/24` | `10.0.3.2` | — | `10.0.3.1` | Host ↔ Guest 2 |
+
+### Application assignments
+
+| App | Runs on | IP | Port / Protocol |
+|---|---|---|---|
+| `motor_data_producer` | Guest 1 | — | SHM `/motor_ctrl` (local) |
+| `motor_ai_client` | Guest 1 | `10.0.2.1` | SOME/IP client → server port 30501 |
+| `motor_ai_server` | Guest 2 | `10.0.2.2` | SOME/IP server on port 30501 |
+| `qt_cluster` | Guest 1 | — | Reads `/motor_ctrl` SHM (local) |
+
+### vsomeip / CommonAPI configs
+
+| File | Location on target | Purpose |
+|---|---|---|
+| `vsomeip_multicast.json` → `vsomeip.json` | `/Motor_AI_Client/vsomeip.json` | Client SD config |
+| `vsomeip_multicast.json` → `vsomeip.json` | `/Motor_AI_Server/vsomeip.json` | Server SD config |
+| `commonapi4someip.ini` | `/etc/commonapi.ini` | CommonAPI core binding (`binding=someip`) |
+| `commonapi4someip.ini` | `/etc/commonapi4someip.ini` | CommonAPI SOME/IP binding config |
+
+Service discovery uses multicast `224.244.224.245:30491`.
+
+---
+
+## 9. Adding a new application to `src/`
 
 **Step 1 — create the app.** Make `src/<myapp>/` with your sources and a `Makefile` that
 cross-compiles with `qcc` into a predictable output path:
@@ -251,7 +294,7 @@ myapp=../../../src/myapp/build/myapp
 
 ---
 
-## 8. Troubleshooting
+## 10. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|
