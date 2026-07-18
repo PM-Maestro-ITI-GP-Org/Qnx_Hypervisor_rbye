@@ -1,0 +1,100 @@
+################################################################################################
+##
+## rootfs.img — guest-1 data partition (QNX6 filesystem, built with mkqnx6fsimg)
+##
+## A guest IFS is RAM-resident: every byte in qnx800-guest-1.ifs is copied into guest RAM
+## at boot. The graphics stack and the two Qt deploy trees alone were ~555MB of a 651MB
+## IFS, so they live here instead and are read from a virtual disk on demand.
+##
+## This image is attached to the guest by qnx-guest-1.qvmconf:
+##
+##     vdev virtio-blk
+##             loc 0x1c0b0000
+##             intr gic:45
+##             hostdev rootfs.img
+##
+## and union-mounted at / by /proc/boot/.rootfs-mount.sh early in the boot script, so
+## every path below is visible at exactly the same location it occupied when it was
+## baked into the IFS. Nothing outside this file and the .build needed to change.
+##
+## Paths must stay in sync with the "moved to rootfs.img" comments in
+## qnx800-guest-1.build. Adding a large file? Put it here, not there.
+##
+################################################################################################
+
+# Size in 512-byte disk sectors, must be a multiple of 8.
+# 1843200 * 512 = 900MB, against ~555MB of content — headroom for the Qt deploys to grow.
+[num_sectors=1843200]
+
+# Inodes are pre-allocated at format time and cannot be added later. The two Qt deploy
+# trees are ~3000 files between them; 20000 leaves plenty of room.
+[num_inodes=20000]
+
+[blksize=4096]
+
+[uid=0 gid=0 perms=0755]
+
+
+################################################################################################
+## virtio graphics stack (screen / Mesa virgl / ANGLE / Vulkan ICDs)
+##
+## Loaded by drm-virtio and "screen -c" when /scripts/graphics-virtio-start.sh runs, which
+## happens long after this filesystem is mounted. virtio_opencl.so (197MB) and
+## virtio_dri.so (67MB) are the two largest files in the whole guest.
+##
+## NOTE: libvulkan.so.1 and libdrm.so* deliberately stay in the IFS — they come from the
+## SDP rather than oss_packages, and they are small.
+################################################################################################
+/usr/bin/drm-virtio=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/bin/drm-virtio
+
+/usr/lib/EGL-mesa.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/EGL-mesa.so
+/usr/lib/gfxstream_vk_icd.json=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/gfxstream_vk_icd.json
+/usr/lib/GLESv2-mesa.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/GLESv2-mesa.so
+/usr/lib/gpu_virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/gpu_virtio.so
+/usr/lib/libEGL_Angle.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libEGL_Angle.so
+/usr/lib/libGLESv2_Angle.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libGLESv2_Angle.so
+/usr/lib/libwfdcfg-virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libwfdcfg-virtio.so
+/usr/lib/libWFDvirtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libWFDvirtio.so
+/usr/lib/screen-alloc-virtio-gfxstream.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-gfxstream.so
+/usr/lib/screen-alloc-virtio-virgl.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-virgl.so
+/usr/lib/virtio_dri.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/virtio_dri.so
+/usr/lib/virtio_icd.json=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/virtio_icd.json
+/usr/lib/virtio_opencl.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/virtio_opencl.so
+/usr/lib/vulkan_gfxstream.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/vulkan_gfxstream.so
+/usr/lib/vulkan_virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/vulkan_virtio.so
+
+# screen looks these two up under /usr/share/screen as well as /usr/lib
+/usr/share/screen/libwfdcfg-virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libwfdcfg-virtio.so
+/usr/share/screen/screen-alloc-virtio-gfxstream.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-gfxstream.so
+/usr/share/screen/screen-alloc-virtio-virgl.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-virgl.so
+
+/usr/share/screen/graphics-virtio-gfxstream.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-gfxstream.conf
+/usr/share/screen/graphics-virtio-gfxstream-virtual.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-gfxstream-virtual.conf
+/usr/share/screen/graphics-virtio-virgl.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl.conf
+/usr/share/screen/graphics-virtio-virgl-modern.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl-modern.conf
+/usr/share/screen/graphics-virtio-virgl-virtual.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl-virtual.conf
+
+
+################################################################################################
+## Qt applications (~126MB each)
+##
+## Both run.sh scripts resolve their own directory ("DIR=$(cd $(dirname $0) && pwd)") and set
+## LD_LIBRARY_PATH/QML2_IMPORT_PATH from it, so the trees relocate cleanly.
+##
+## /QT_Demo_APP was previously staged as "QT_Demo_APP/", i.e. without a leading slash, which
+## put it under /proc/boot — procnto's own namespace, which a filesystem cannot be mounted
+## into. It is an absolute path here, which is also what the .build comments and the host's
+## part_qnx_data.build already assumed.
+################################################################################################
+/QT_Demo_APP=../../../src/QT/Demo_APP/build_qnx/deploy
+/QT_Cluster_APP=../../../src/qt_cluster/build_qnx/deploy
+
+
+################################################################################################
+## CommonAPI / vsomeip shared libraries (~10MB)
+##
+## Also previously under /proc/boot (staged as "lib/") and found via the /proc/boot/lib entry
+## in LD_LIBRARY_PATH. /lib is already on that same search path, so HelloWorldClient and
+## motor_ai_client resolve them here without any change to the boot line.
+################################################################################################
+/lib=../../../src/someip/commonapi-qnx/build-rpi/lib

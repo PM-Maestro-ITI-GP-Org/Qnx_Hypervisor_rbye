@@ -4,9 +4,14 @@
 
 system guest_1
 
-# Raised from 512M: the guest IFS is RAM-resident and the Qt demo deploy (~188MB,
-# staged as /QT_Demo_APP) pushes the IFS to ~490MB. 2G leaves room for the IFS + Qt
-# runtime + graphics buffers. Lower it if you trim/remove the Qt app.
+# The guest IFS is RAM-resident, so it used to dominate this figure: with the graphics
+# stack and both Qt deploys baked in, the IFS alone was ~651MB and 2G was needed to hold
+# it plus the Qt runtime and graphics buffers.
+#
+# Those payloads now live on rootfs.img (see the data-disk vdev below) and the IFS is
+# ~37MB, so most of this 2G is no longer required. It is left as-is deliberately: the Qt
+# runtime and the virgl graphics buffers still want headroom, and reducing it is a
+# separate change worth testing on hardware rather than a side effect of the split.
 ram 0x80000000,2G
 
 # Add a 'cpu' for each virtual CPU that the guest will have
@@ -86,6 +91,27 @@ vdev virtio-blk
         hostdev /dev/qvmdisk0
 	#Name given here so that pidin threads output will be easier to read
 	name virtio-blk_qvmdisk0
+
+
+# Guest data disk.
+#
+# rootfs.img holds everything large that used to be baked into the RAM-resident IFS: the
+# virtio graphics stack, both Qt deploy trees and the CommonAPI/vsomeip libraries (~555MB).
+# The guest union-mounts it at / during boot via /proc/boot/.rootfs-mount.sh, so all of
+# those files keep the exact paths they had inside the image.
+#
+# The path is relative because qvm is launched from this directory
+# (cd /guests/guest-1 && qvm @qnx-guest-1.qvmconf), the same way 'load qnx-guest.ifs' above
+# resolves. rootfs.img is placed next to this file by the host's part_qnx_data.build.
+#
+# loc/intr MUST match the smem= and irq= arguments that .rootfs-mount.sh passes to
+# devb-virtio. 0x1c0b0000 and gic:45 were free; every other vdev here is at
+# 0x1c05/09/0c/0d/0e/0f_0000 with interrupts 37-44.
+vdev virtio-blk
+        loc 0x1c0b0000
+        intr gic:45
+        hostdev rootfs.img
+        name virtio-blk_rootfs
 
 
 #An example SP805 watchdog (to use see /scripts/watchdog-start.sh in guest)

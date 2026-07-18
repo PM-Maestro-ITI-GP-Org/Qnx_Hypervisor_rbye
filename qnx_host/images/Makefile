@@ -106,6 +106,7 @@ part_dos_boot.img: $(BOARD)-part_dos_boot.build ifs-$(BOARD)-hyp.bin
 GUEST_DIR := ../../qnx_guests/images
 GUEST_IMAGES := \
 	$(GUEST_DIR)/guest-1/qnx800-guest-1.ifs \
+	$(GUEST_DIR)/guest-1/rootfs.img \
 	$(GUEST_DIR)/guest-1/qnx-guest-1.qvmconf \
 	$(GUEST_DIR)/guest-2/qnx800-guest-2.ifs \
 	$(GUEST_DIR)/guest-2/qnx-guest-2.qvmconf
@@ -113,7 +114,7 @@ GUEST_IMAGES := \
 # Safety net for host-only builds: materialize a guest IFS if it's missing by
 # delegating to its own Makefile. (Staleness of an existing IFS is handled by the
 # guest build itself; `make` at the repo root also builds qnx_guests before qnx_host.)
-$(GUEST_DIR)/guest-1/qnx800-guest-1.ifs:
+$(GUEST_DIR)/guest-1/qnx800-guest-1.ifs $(GUEST_DIR)/guest-1/rootfs.img:
 	$(MAKE) -C $(GUEST_DIR)/guest-1
 $(GUEST_DIR)/guest-2/qnx800-guest-2.ifs:
 	$(MAKE) -C $(GUEST_DIR)/guest-2

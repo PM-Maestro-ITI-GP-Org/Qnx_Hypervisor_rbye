@@ -63,6 +63,17 @@
 
 
     ############################################################################################
+    ## Data disk (rootfs.img) — union-mounted at /
+    ##
+    ## Everything large lives on this disk instead of in the RAM-resident IFS: the virtio
+    ## graphics stack, both Qt deploy trees and the CommonAPI/vsomeip libraries. Mounted
+    ## here, before any of it is used, so all paths resolve exactly as they did when the
+    ## files were baked into the image.
+    ############################################################################################
+    /proc/boot/.rootfs-mount.sh
+
+
+    ############################################################################################
     ## SPI master driver (pass-through device at guest 0x1c200000, IRQ 44)
     ############################################################################################
     display_msg "Starting SPI master driver ..."
@@ -248,6 +259,49 @@ then
     flashctl -p /dev/fs9p0 -e -f -n /var -m
     mkdir -m 755 /var/run
     mkdir -m 755 /var/db
+fi
+}
+
+
+################################################################################################
+## Mount the guest data disk (rootfs.img) at /
+##
+## rootfs.img is attached by qnx-guest-1.qvmconf as a second virtio-blk vdev at
+## loc 0x1c0b0000 / gic:45 -- the smem and irq below MUST match those values. The first
+## virtio-blk vdev (0x1c0d0000 / gic:41, the host devb-ram scratch disk) is untouched and
+## is still started manually by /scripts/block-start.sh.
+##
+## mkqnx6fsimg writes a bare QNX6 filesystem with no partition table, so the whole device
+## is the filesystem: mount /dev/vblk0 directly rather than a /dev/vblk0t177 partition.
+##
+## Mounting at / unions this filesystem with the boot image, so /usr/lib/virtio_opencl.so,
+## /QT_Cluster_APP and /lib resolve to the disk while /bin, /sbin and the drivers keep
+## coming from the IFS.
+##
+## NOTE: no '{' or '}' anywhere in this block -- mkifs ends an inline "= { }" block at the
+## first '}' it sees, so shell brace expansion cannot be used here. Use if/then/fi.
+################################################################################################
+[perms=0744] .rootfs-mount.sh = {
+#!/bin/ksh
+
+echo "Starting virtio block driver for the data disk ..."
+devb-virtio virtio smem=0x1c0b0000,irq=45 disk name=vblk
+
+if waitfor /dev/vblk0 10
+then
+    mount -t qnx6 /dev/vblk0 /
+else
+    echo "ERROR: /dev/vblk0 never appeared -- is rootfs.img present next to the .qvmconf?"
+fi
+
+## Confirm the union actually took effect. Everything graphical and every Qt app depends
+## on it, and all of that starts much later, so failing silently here would surface as a
+## confusing "library not found" long after the real cause.
+if test -f /usr/lib/virtio_opencl.so
+then
+    echo "Data disk mounted at / (graphics stack and Qt apps available)"
+else
+    echo "ERROR: data disk did not mount -- graphics and the Qt apps will NOT start"
 fi
 }
 
@@ -852,7 +906,10 @@ idle_insert=1
 ################################################################################################
 HelloWorldClient =../../../src/someip/commonapi_client_server/client/build/HelloWorldClient
 vsomeip_client.json =../../../src/someip/commonapi_client_server/client/vsomeip_client_mc.json
-lib/ =../../../src/someip/commonapi-qnx/build-rpi/lib
+## The CommonAPI/vsomeip shared libraries (~10MB, previously staged here as "lib/", i.e.
+## /proc/boot/lib) MOVED TO rootfs.img, where they live at /lib. Both directories are already
+## on the LD_LIBRARY_PATH set on the procnto line, so HelloWorldClient and motor_ai_client
+## still resolve them without any change.
 
 
 # Graphics driver files
@@ -911,26 +968,16 @@ config.json=../../../src/giga_spi_8adc/config.json
 ########################################################################
 
 
-/usr/bin/drm-virtio=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/bin/drm-virtio
-
-/usr/lib/EGL-mesa.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/EGL-mesa.so
-/usr/lib/gfxstream_vk_icd.json=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/gfxstream_vk_icd.json
-/usr/lib/GLESv2-mesa.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/GLESv2-mesa.so
-/usr/lib/gpu_virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/gpu_virtio.so
-/usr/lib/libEGL_Angle.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libEGL_Angle.so
-/usr/lib/libGLESv2_Angle.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libGLESv2_Angle.so
-/usr/lib/libwfdcfg-virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libwfdcfg-virtio.so
-/usr/share/screen/libwfdcfg-virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libwfdcfg-virtio.so
-/usr/lib/libWFDvirtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/libWFDvirtio.so
-/usr/lib/screen-alloc-virtio-gfxstream.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-gfxstream.so
-/usr/lib/screen-alloc-virtio-virgl.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-virgl.so
-/usr/share/screen/screen-alloc-virtio-gfxstream.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-gfxstream.so
-/usr/share/screen/screen-alloc-virtio-virgl.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/screen-alloc-virtio-virgl.so
-/usr/lib/virtio_dri.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/virtio_dri.so
-/usr/lib/virtio_icd.json=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/virtio_icd.json
-/usr/lib/virtio_opencl.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/virtio_opencl.so
-/usr/lib/vulkan_gfxstream.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/vulkan_gfxstream.so
-/usr/lib/vulkan_virtio.so=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/lib/vulkan_virtio.so
+################################################################################################
+## The virtio graphics stack (drm-virtio, the Mesa/ANGLE/Vulkan .so set and the
+## graphics-virtio-*.conf files) MOVED TO rootfs.img — see rootfs.build.
+##
+## It was ~292MB of a RAM-resident IFS, dominated by virtio_opencl.so (197MB) and
+## virtio_dri.so (67MB). rootfs.img is union-mounted at / before any of it is needed, so
+## the paths are unchanged: /usr/lib/virtio_opencl.so is still /usr/lib/virtio_opencl.so.
+##
+## libvulkan.so.1 and libdrm.so* stay here: they come from the SDP, not oss_packages.
+################################################################################################
 # Vulkan loader (from the SDP): NEEDED by screen-alloc-virtio-virgl.so, which
 # libkhronos dlopen's for graphics-virtio-mmio.conf. Without it, "screen -c" fails
 # with "libvulkan.so.1 => unable to load". Its own deps (libm/libc/libgcc_s) are
@@ -941,11 +988,7 @@ config.json=../../../src/giga_spi_8adc/config.json
 /lib/dll/libdrm.so=libdrm.so
 
 
-/usr/share/screen/graphics-virtio-gfxstream.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-gfxstream.conf
-/usr/share/screen/graphics-virtio-gfxstream-virtual.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-gfxstream-virtual.conf
-/usr/share/screen/graphics-virtio-virgl.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl.conf
-/usr/share/screen/graphics-virtio-virgl-modern.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl-modern.conf
-/usr/share/screen/graphics-virtio-virgl-virtual.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl-virtual.conf
+## (the graphics-virtio-*.conf files from oss_packages also moved to rootfs.img)
 
 
 ################################################################################################
@@ -962,18 +1005,20 @@ config.json=../../../src/giga_spi_8adc/config.json
 
 
 ################################################################################################
-## Qt demo app (QtQuick2DDemo, software render backend). Whole deploy tree -> /QT_Demo_APP/.
+## Qt apps (QtQuick2DDemo + the cluster app, ~126MB each) MOVED TO rootfs.img.
+##
 ## Run in the guest AFTER graphics is up:  sh /QT_Demo_APP/run.sh
-## NOTE: this deploy is ~188MB; a guest IFS is RAM-resident, so guest RAM was raised to 2G
-## in qnx-guest-1.qvmconf to fit the larger IFS + Qt runtime. Trim the deploy or move it to
-## a disk if you need the guest smaller.
+## The cluster app is started by /scripts/start-guest1.sh (cd /QT_Cluster_APP && sh run.sh).
+##
+## /QT_Demo_APP is now a real absolute path. It used to be staged as "QT_Demo_APP/" with no
+## leading slash, which actually placed it under /proc/boot despite what the comment here
+## claimed — and /proc/boot is procnto's own namespace, which a filesystem cannot be mounted
+## into, so it had to become absolute to live on the data disk.
+##
+## Only libeventfd stays here (it is a small SDP library, not part of the deploy).
 ################################################################################################
 /lib/dll/ibeventfd.so.1=libeventfd.so.1
 /lib/dll/ibeventfd.so=libeventfd.so
-
-QT_Demo_APP/ =../../../src/QT/Demo_APP/build_qnx/deploy
-
-/QT_Cluster_APP=../../../src/qt_cluster/build_qnx/deploy
 
 /Motor_Data_Producer/motor_data_producer=../../../src/motor_data_producer/QNX-SPI/build_qnx/motor_data_producer
 /Motor_Data_Producer/config.json=../../../src/motor_data_producer/QNX-SPI/config.json

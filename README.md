@@ -177,10 +177,32 @@ data partition:
 ```sh
 scp qnx_guests/images/guest-1/qnx800-guest-1.ifs    root@192.168.2.2:/guests/guest-1/qnx-guest.ifs
 scp qnx_guests/images/guest-1/qnx-guest-1.qvmconf   root@192.168.2.2:/guests/guest-1/
+# only when something on the data disk changed (graphics stack / Qt apps / CommonAPI libs):
+scp qnx_guests/images/guest-1/rootfs.img            root@192.168.2.2:/guests/guest-1/
 # then on the host:  slay qvm  &&  qvm @qnx-guest-1.qvmconf
 ```
 
 Only **host IFS** changes require rebuilding `disk.img` and reflashing.
+
+### guest-1 is split into two images
+
+A guest IFS is RAM-resident — every byte is copied into guest RAM at boot. guest-1 carries
+a graphics stack and two Qt apps, which together were ~555MB of a 651MB image, so they live
+on a separate virtual disk instead:
+
+| File | Size | Contents |
+|---|---|---|
+| `qnx800-guest-1.ifs` | ~37MB | kernel, drivers, network, ssh, shell, app binaries, configs |
+| `rootfs.img` | 900MB image | virtio graphics stack, `/QT_Demo_APP`, `/QT_Cluster_APP`, CommonAPI/vsomeip libs |
+
+`rootfs.img` is attached as a second `virtio-blk` vdev (`loc 0x1c0b0000`, `gic:45`) and
+**union-mounted at `/`** by `/proc/boot/.rootfs-mount.sh` early in the boot script, so every
+path is unchanged: `/usr/lib/virtio_opencl.so` is still `/usr/lib/virtio_opencl.so`. The
+guest prints `Data disk mounted at /` on success, or a clear error if the disk is missing.
+
+Add large files to `rootfs.build`, not to `qnx800-guest-1.build`. Note that `rootfs.img`
+cannot supply anything under `/proc/boot` — that is procnto's own namespace and a filesystem
+cannot be mounted into it, so those entries use absolute paths (`/QT_Demo_APP`, `/lib`).
 
 ---
 

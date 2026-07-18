@@ -49,6 +49,11 @@ mount -tdos /dev/sd0t12 /dos
 /guests/guest-1/qnx-guest.ifs = ../../qnx_guests/images/guest-1/qnx800-guest-1.ifs
 /guests/guest-1/qnx-guest-1.qvmconf = ../../qnx_guests/images/guest-1/qnx-guest-1.qvmconf
 
+# guest-1 data disk: everything large (graphics stack, both Qt deploys, CommonAPI libs)
+# lives here rather than in the RAM-resident IFS. The qvmconf references it as a relative
+# path, so it has to sit in the same directory as the .qvmconf that loads it.
+/guests/guest-1/rootfs.img = ../../qnx_guests/images/guest-1/rootfs.img
+
 /guests/guest-2/qnx-guest.ifs = ../../qnx_guests/images/guest-2/qnx800-guest-2.ifs
 /guests/guest-2/qnx-guest-2.qvmconf = ../../qnx_guests/images/guest-2/qnx-guest-2.qvmconf
 
