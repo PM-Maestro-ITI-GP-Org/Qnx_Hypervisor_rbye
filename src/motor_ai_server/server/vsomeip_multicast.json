@@ -1,0 +1,36 @@
+{
+    "unicast": "10.0.2.2",
+    "logging": {
+        "level": "error",
+        "console": "true",
+        "file": {
+            "enable": "false",
+            "path": "/var/log/vsomeip.log"
+        },
+        "dlt": "false"
+    },
+    "applications": [
+        {
+            "name": "motor-ai-service",
+            "id": "0x1280"
+        }
+    ],
+    "services": [
+        {
+            "service": "0x1240",
+            "instance": "0x5680",
+            "reliable": {
+                "port": "30501",
+                "enable-magic-cookies": "false"
+            },
+            "unreliable": "31001"
+        }
+    ],
+    "routing": "motor-ai-service",
+    "service-discovery": {
+        "enable": "true",
+        "multicast": "224.244.224.245",
+        "port": "30491",
+        "protocol": "udp"
+    }
+}
