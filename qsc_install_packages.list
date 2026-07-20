@@ -87,6 +87,7 @@ com.qnx.qnx800.target.connectivity.char/0.1.0.00011T202411230100L
 com.qnx.qnx800.target.connectivity.devc/0.2.0.00011T202411230100L
 com.qnx.qnx800.target.connectivity.io_char/0.2.0.00011T202411230100L
 com.qnx.qnx800.target.docs.plugins/0.0.1.00599T202412040959L
+com.qnx.qnx800.target.driver.cypress_dhd_sdio/0.0.4.00003T202510060827L
 com.qnx.qnx800.target.driver.cypress_dhd_sdio_rpi5_2_11/0.0.1.03054T202511131755L
 com.qnx.qnx800.target.driver.virtio/0.1.0.02005T202411230033L
 com.qnx.qnx800.target.driver.virtio.devb/0.1.0.00011T202411230104L
@@ -194,6 +195,7 @@ com.qnx.qnx800.target.net.tcpdump/0.2.0.02504T202504081900L
 com.qnx.qnx800.target.net.unbound/0.0.2.00417T202407041502L
 com.qnx.qnx800.target.net.utils/0.5.0.00015T202605220948L
 com.qnx.qnx800.target.net.utils.if_up/0.3.0.00103T202507311314L
+com.qnx.qnx800.target.net.wpa_supplicant_2.11.iosock/0.0.5.00007T202509220833L
 com.qnx.qnx800.target.net.utils.ifwatchd/0.3.0.00103T202507311314L
 com.qnx.qnx800.target.net.vdevpeernet/0.2.1.02514T202505011059L
 com.qnx.qnx800.target.notify_fd/1.0.0.00103T202510151739L
