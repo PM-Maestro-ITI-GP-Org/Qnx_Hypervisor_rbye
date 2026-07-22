@@ -20,13 +20,15 @@ DRIVER=devs-qwdi_dhd_sdio-2_11-rpi5.so
 
 if [ ! -f /etc/firmware/brcmfmac43455-sdio.bin ]; then
     echo "wifi: MISSING firmware /etc/firmware/brcmfmac43455-sdio.bin"
-    echo "wifi: see conf/wifi/README.md - firmware is not shipped in this repo"
+    echo "wifi: install com.qnx.qnx800.target.driver.cypress_dhd_sdio into the SDP,"
+    echo "wifi: then rebuild and reflash. See conf/wifi/README.md."
     exit 1
 fi
 
 if ! command -v wpa_supplicant >/dev/null 2>&1; then
     echo "wifi: MISSING wpa_supplicant binary"
-    echo "wifi: it is not in qsc_install_packages.list - see conf/wifi/README.md"
+    echo "wifi: install com.qnx.qnx800.target.net.wpa_supplicant_2.11.iosock into the SDP,"
+    echo "wifi: then rebuild and reflash. See conf/wifi/README.md."
     exit 1
 fi
 
@@ -36,20 +38,38 @@ if grep -q CHANGEME $WPA_CONF 2>/dev/null; then
 fi
 
 # --- driver ----------------------------------------------------------------------
+# Snapshot the interface list first: rather than guessing the WiFi interface by name
+# prefix, take whichever interface is new after the driver attaches. The name is chosen
+# by the driver and is not documented anywhere, so matching on "wlan*" was a guess -- and
+# a dangerous one to get wrong, since cgem0 (the wired NIC in bridge0) is the ssh path.
+IF_BEFORE=" $(ifconfig -l) "
+echo "wifi: interfaces before: $IF_BEFORE"
+
 echo "wifi: mounting $DRIVER into io-sock ..."
 mount -T io-sock $DRIVER || {
     echo "wifi: failed to mount $DRIVER"
     exit 1
 }
 
-# The interface name comes from the driver; list what appeared so it is visible in the
-# log if it is not the expected one.
-echo "wifi: interfaces now present:"
-ifconfig -l
+echo "wifi: interfaces after:  $(ifconfig -l)"
 
-WLAN_IF=$(ifconfig -l | tr ' ' '\n' | grep -E '^(wlan|bcm)' | head -1)
+# Pure-shell diff. The IFS in this image has no 'tr', and busybox-style pipelines are not
+# available either, so this uses only shell builtins.
+WLAN_IF=
+for i in $(ifconfig -l); do
+    case "$IF_BEFORE" in
+        *" $i "*) ;;            # was already present
+        *)        WLAN_IF=$i ;; # new since the mount -> this is the radio
+    esac
+done
+
 if [ -z "$WLAN_IF" ]; then
-    echo "wifi: no wlan interface appeared - check 'sloginfo' for driver errors"
+    echo "wifi: no new interface appeared after mounting the driver."
+    echo "wifi: the driver attached but the radio did not come up - most likely the"
+    echo "wifi: firmware failed to load. Driver messages follow:"
+    echo "---------------------------------------------------------------"
+    sloginfo | tail -40
+    echo "---------------------------------------------------------------"
     exit 1
 fi
 echo "wifi: using interface $WLAN_IF"
