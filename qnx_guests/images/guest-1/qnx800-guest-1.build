@@ -8,7 +8,7 @@
 [+keeplinked]
 [image=0x80000000]
 [virtual=aarch64le,elf ] boot = {
-    startup-armv8_fm -H 
+    startup-armv8_fm -H
     PATH=/proc/boot:/sbin:/bin:/usr/bin:/usr/sbin:/usr/libexec LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib:/lib/dll:/lib/dll/pci:/proc/boot/lib procnto-smp-instr -v
 }
 
@@ -126,10 +126,8 @@
     # Assign static IP addresses:
     # 	Guest 1 vtnet0 (↔ Host):       10.0.1.1/24
     # 	Guest 1 vtnet1 (↔ Guest 2):    10.0.2.1/24
-    ifconfig vtnet0 10.0.1.1/24
+    ifconfig vtnet0 10.0.0.2/24
     ifconfig vtnet1 10.0.2.1/24
-
-
 
     ############################################################################################
     ## Customize startup components
@@ -138,6 +136,13 @@
 
 
 #-------------------------------------------------------------------------------
+    ## Static default route via host (pf NATs this to bcm0)
+    route add default 10.0.0.1
+
+    ## Stop dhcpcd AFTER setting the static route — if left running it clears
+    ## the default route and adds 169.254.x.x APIPA addresses on lease failure.
+    sh -c "slay -f dhcpcd 2>/dev/null"
+
     display_msg "Virtual networking comes up by default if virtio-net devices are configured for this guest"
     display_msg ""
     display_msg "A virtual block device can be started by running /scripts/block-start.sh"
@@ -177,25 +182,46 @@
 }
 
 
+
 [perms=0744] /scripts/start-guest1.sh = {
 #!/bin/sh
 
+echo "=== Killing stale processes ==="
+slay motor_recorder 2>/dev/null
+slay motor_ai_client 2>/dev/null
+slay motor_data_producer 2>/dev/null
+slay vsomeip-routing 2>/dev/null
+rm -f /dev/shmem/vsomeip*
+rm -f /var/vsomeip-*
+
 echo "=== Starting motor_data_producer ==="
-/Motor_Data_Producer/motor_data_producer /Motor_Data_Producer/config.json &
+nohup /Motor_Data_Producer/motor_data_producer /Motor_Data_Producer/config.json > /dev/null 2>&1 &
 
-sleep 1
+# Wait for SHM to be ready
+for i in 1 2 3 4 5; do
+    if [ -e /dev/shmem/motor_ctrl ]; then break; fi
+    sleep 1
+done
 
+echo "=== Starting motor_ai_client ==="
 export VSOMEIP_CONFIGURATION=/Motor_AI_Client/vsomeip.json
-/Motor_AI_Client/motor_ai_client >/dev/null 2>&1 &
+/Motor_AI_Client/motor_ai_client >/tmp/motor_ai_client.log 2>&1 &
 
 sleep 1
 
+echo "=== Starting graphics ==="
 /scripts/graphics-virtio-start.sh >/dev/null 2>&1
+
+echo "=== Starting Qt Cluster ==="
 cd /QT_Cluster_APP && exec sh run.sh >/dev/null 2>&1
 }
 
-[uid=0 gid=0]
 
+
+
+
+
+[uid=0 gid=0]
 [type=link] /bin/sh=/bin/ksh
 [type=link] /tmp=/dev/shmem
 [type=link] /dev/console=/dev/vcon1
@@ -343,7 +369,6 @@ fi
 /sbin/dhcpcd-hooks/20-resolv.conf=${QNX_TARGET}/sbin/dhcpcd-hooks/20-resolv.conf
 /sbin/ifconfig=ifconfig
 /sbin/io-sock=io-sock
-/sbin/pfctl=pfctl
 [uid=0 gid=0 perms=4755] /sbin/ping=ping
 /sbin/route=route
 /sbin/sysctl=sysctl
@@ -352,7 +377,6 @@ fi
 /usr/bin/sockstat=sockstat
 /usr/bin/vmstat=vmstat
 
-/usr/sbin/arp=arp
 /usr/sbin/devctl=devctl
 /usr/sbin/devinfo=devinfo
 /usr/sbin/fs-nfs3=fs-nfs3
@@ -394,9 +418,22 @@ fi
 [uid=0 gid=0 perms=0755] /usr/bin/scp=scp
 [uid=0 gid=0 perms=0755] /usr/bin/ssh=ssh
 [uid=0 gid=0 perms=0755] /usr/bin/ssh-keygen=ssh-keygen
+[uid=0 gid=0 perms=0755] /usr/bin/curl=curl
+/usr/lib/libcurl.so.12=libcurl.so.12
+/usr/lib/libcares.so.8=libcares.so.8
+/usr/lib/libssl.so.3=libssl.so.3
+/usr/lib/libcrypto.so.3=libcrypto.so.3
 
 [type=link] /etc/ssh = /dev/shmem
-/dev/shmem/sshd_config=${QNX_TARGET}/etc/ssh/sshd_config
+/dev/shmem/sshd_config = {
+    PermitRootLogin yes
+    AuthorizedKeysFile .ssh/authorized_keys
+    Subsystem sftp /usr/libexec/sftp-server
+}
+
+[perms=0600 uid=0 gid=0] /root/.ssh/authorized_keys = {
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ63lkUzvugd3TnG6SQDUD4QYZH9iU5c+HihwiLP9D79 hms@hypervisor
+}
 
 /etc/esh = {
 }
@@ -868,7 +905,7 @@ io 32 0x1C0F0008 0
 /sbin/gpio-bcm2711=gpio-bcm2711
 /bin/gpio-rp1=../../../qnx_host/prebuilt/aarch64le/bin/gpio-rp1
 # this is the resource manager which visualize the /dev/gpio to access the gpio pins using files instead of msg passing (server)
-/sbin/rpi-gpio=../../../src/rpi-gpio/build/resmgr/rpi_gpio
+/sbin/rpi-gpio=../../../src/rpi-gpio/build-qnx/rpi_gpio
 
 
 # base=0x1f00050000
@@ -885,18 +922,18 @@ irq=44
 input_clock=500000000
 # Set DMA threshold > 0 to force PIO mode; uint8_t field, max=255
 # (dma_thld must fit in uint8_t, so 65536 wraps to 0 -> DMA always!)
-dma_thld=255
+dma_thld=0
 
 [dev]
 parent_busno=0
 devno=0
 name=dev0
-clock_rate=5000000
+clock_rate=21000000
 cpha=0
 cpol=0
 bit_order=msb
 word_width=8
-idle_insert=1
+idle_insert=0
 
 }
 
@@ -1017,8 +1054,8 @@ config.json=../../../src/giga_spi_8adc/config.json
 ##
 ## Only libeventfd stays here (it is a small SDP library, not part of the deploy).
 ################################################################################################
-/lib/dll/ibeventfd.so.1=libeventfd.so.1
-/lib/dll/ibeventfd.so=libeventfd.so
+[search=../../../qnx800/target/qnx/${PROCESSOR}/usr/lib] /lib/dll/libeventfd.so.1=libeventfd.so.1
+[search=../../../qnx800/target/qnx/${PROCESSOR}/usr/lib] /lib/dll/libeventfd.so=libeventfd.so
 
 /Motor_Data_Producer/motor_data_producer=../../../src/motor_data_producer/QNX-SPI/build_qnx/motor_data_producer
 /Motor_Data_Producer/config.json=../../../src/motor_data_producer/QNX-SPI/config.json
@@ -1027,3 +1064,29 @@ config.json=../../../src/giga_spi_8adc/config.json
 /Motor_AI_Client/vsomeip.json=../../../src/motor_ai_client/client/vsomeip_multicast.json
 /etc/commonapi.ini=../../../src/motor_ai_client/interface/commonapi4someip.ini
 /etc/commonapi4someip.ini=../../../src/motor_ai_client/interface/commonapi4someip.ini
+
+/Motor_Recorder/motor_recorder=../../../src/motor_recorder/motor_recorder
+
+[perms=0744] /scripts/start-recording.sh = {
+#!/bin/sh
+
+echo "=== Killing stale processes ==="
+slay motor_recorder 2>/dev/null
+slay motor_data_producer 2>/dev/null
+
+echo "=== Starting motor_data_producer (background, silent) ==="
+nohup /Motor_Data_Producer/motor_data_producer /Motor_Data_Producer/config.json > /dev/null 2>&1 &
+
+# Wait for SHM
+for i in 1 2 3 4 5; do
+    if [ -e /dev/shmem/motor_ctrl ]; then break; fi
+    sleep 1
+done
+
+echo "=== Starting motor_recorder ==="
+echo "Type 'help' for commands | 'start' to record | 'stop' then 'upload'"
+echo ""
+/Motor_Recorder/motor_recorder
+
+echo "=== motor_recorder exited ==="
+}

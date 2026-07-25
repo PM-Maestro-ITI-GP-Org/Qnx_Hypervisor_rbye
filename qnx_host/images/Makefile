@@ -84,7 +84,7 @@ ifneq ($(IFS_MISSING),)
 	@exit 1
 endif
 	@echo "Creating image: $@ from build file: $<"
-	$(HOST_MKIFS) -v -r$(INSTALL) $(MKIFSFLAGS) $< $@
+	$(HOST_MKIFS) -v -r$(INSTALL) -r../../qnx800/target/qnx $(MKIFSFLAGS) $< $@
 
 clean:
 	@echo "Cleaning generated files for $(BOARD)"

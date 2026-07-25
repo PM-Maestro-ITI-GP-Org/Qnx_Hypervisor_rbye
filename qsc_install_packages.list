@@ -325,6 +325,8 @@ com.qnx.qnx800.target.utils.qnx/0.0.1.00282T202404151301L
 com.qnx.qnx800.target.utils.system/0.1.0.00132T202605281115L
 com.qnx.qnx800.target.utils.system.dumpefs/0.0.1.00007T202411221949L
 com.qnx.qnx800.target.utils.system.dumpifs/1.2.1.00014T202605190942L
+com.qnx.qnx800.target.utils.base.w/0.0.1.00135T202311191043L
+
 com.qnx.qnx800.target.utils.system.dumpifs_nto/1.2.0.00014T202605190942L
 com.qnx.qnx800.target.utils.utlfd/0.0.1.00135T202311191043L
 com.qnx.qnx800.target.utils.valgrind/3.17.0.00307T202605151458L
