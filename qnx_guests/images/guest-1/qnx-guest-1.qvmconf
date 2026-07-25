@@ -15,11 +15,8 @@ system guest_1
 ram 0x80000000,2G
 
 # Add a 'cpu' for each virtual CPU that the guest will have
-#cpu
 cpu
-
-# Use 'runmask' after 'cpu' entries to fix the virtual CPUs to host physical CPUs
-#runmask 0
+cpu
 
 # This IFS is found in the images/ folder of the guest BSP.
 # Here, qvm will look for this IFS in your current working folder.
@@ -133,7 +130,14 @@ pass loc mem:0x1f000e0000,0x4000,rwn
 # GPIO - pads_bank0 (pull/drive/slew config)
 pass loc mem:0x1f000f0000,0x4000,rwn
 
-vdev smmu
+# SMMU disabled: it caused ~1-minute GICv3 init delay under Foundation Model emulation.
+# Each GIC MMIO access trapped through the SMMU, adding ~ms per access across
+# thousands of register writes in the guest startup. Guest 2 (no SMMU) confirmed fast.
+#
+# Re-enable only if you add an explicit SMMU configuration that excludes the GIC
+# address ranges (0x2c000000-0x2f1fffff) from translation — or switch to HW where
+# the SMMU is fast enough to not matter.
+#vdev smmu
 
 #set pci-mux-path /dev/pci_mux
 
