@@ -1,25 +1,18 @@
 #include "MotorDataStubImpl.hpp"
 
-#include <ctime>
-#include <sstream>
+#include <cstdio>
 #include <iostream>
 
-static std::string timestampStr()
-{
-    std::time_t t = std::time(nullptr);
-    char buf[64];
-    std::strftime(buf, sizeof buf, "%Y%m%d_%H%M%S", std::gmtime(&t));
-    return buf;
-}
+static const char *CSV_NEW = "/tmp/motor_data_new.csv";
+static const char *CSV_OLD = "/tmp/motor_data_old.csv";
 
 MotorDataStubImpl::MotorDataStubImpl()
 {
-    std::string path = "/tmp/motor_data_" + timestampStr() + ".csv";
-    csvFile_.open(path, std::ios::app);
+    csvFile_.open(CSV_NEW, std::ios::trunc);
     if (csvFile_.is_open()) {
-        std::cout << "[AI-server] CSV file: " << path << std::endl;
+        std::cout << "[AI-server] CSV file: " << CSV_NEW << " (window=" << WINDOW_SIZE << ")" << std::endl;
     } else {
-        std::cerr << "[AI-server] ERROR: could not open CSV file: " << path << std::endl;
+        std::cerr << "[AI-server] ERROR: could not open CSV file: " << CSV_NEW << std::endl;
     }
 }
 
@@ -37,6 +30,23 @@ void MotorDataStubImpl::ensureCsvHeader()
                  << "voltage_a,voltage_b,voltage_c,voltage_dc_bus,voltage_speed,"
                  << "vib_x,vib_y,vib_z,rpm"
                  << std::endl;
+    }
+}
+
+void MotorDataStubImpl::rotateCsv()
+{
+    csvFile_.close();
+    /* current motor_data_new.csv is now a complete batch: move it to old */
+    std::remove(CSV_OLD);
+    std::rename(CSV_NEW, CSV_OLD);
+    /* start a fresh new file for the next batch */
+    csvFile_.open(CSV_NEW, std::ios::trunc);
+    if (csvFile_.is_open()) {
+        totalRowsWritten_ = 0;
+        ensureCsvHeader();
+        std::cout << "[AI-server] CSV rotated: " << CSV_NEW << " (batch saved to " << CSV_OLD << ")" << std::endl;
+    } else {
+        std::cerr << "[AI-server] ERROR: could not reopen CSV after rotation: " << CSV_NEW << std::endl;
     }
 }
 
@@ -80,7 +90,7 @@ void MotorDataStubImpl::sendBatch(
         size_t n = _rows.size();
         for (size_t i = 0; i < n; ++i) {
             const auto &r = _rows[i];
-            csvFile_ << _timestamp << ","
+            csvFile_ << r.getTimestamp() << ","
                      << _producerSeq << ","
                      << _flags << ","
                      << r.getCurrentA() << ","
@@ -98,6 +108,9 @@ void MotorDataStubImpl::sendBatch(
                      << std::endl;
         }
         totalRowsWritten_ += n;
+        if (totalRowsWritten_ >= WINDOW_SIZE) {
+            rotateCsv();
+        }
     }
 
     std::cout << "[AI-server] batch: " << _rows.size() << " rows (seq=" << _producerSeq

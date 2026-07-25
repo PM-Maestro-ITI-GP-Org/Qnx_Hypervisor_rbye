@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#define WINDOW_SIZE  200u
+#define WINDOW_SIZE    200u   /* rows per batch = rows per CSV file */
 
 class MotorDataStubImpl : public v0_1::commonapi::MotorDataServiceStubDefault {
 public:
@@ -30,6 +30,7 @@ private:
     uint64_t      totalRowsWritten_{0};
 
     void ensureCsvHeader();
+    void rotateCsv();
 
     std::string runAnomalyDetection(const std::vector<v0_1::commonapi::MotorDataService::MotorRow> &rows);
     std::string runFaultClassification(const std::vector<v0_1::commonapi::MotorDataService::MotorRow> &rows);
