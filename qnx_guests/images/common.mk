@@ -102,7 +102,7 @@ ifneq ($(IFS_MISSING),)
 	@echo "       Build them first (e.g. 'make -C ../../../src'), then re-run." >&2
 	@exit 1
 endif
-	$(HOST_MKIFS) -a$(F_NAME) -r$(INSTALL) -v $(MKIFSFLAGS) $< $@
+	$(HOST_MKIFS) -a$(F_NAME) -r$(INSTALL) -r../../../qnx800/target/qnx -v $(MKIFSFLAGS) $< $@
 
 $(ROOTFS_IMG): $(ROOTFS_BUILD) $(ROOTFS_DEPS)
 ifneq ($(ROOTFS_MISSING),)
