@@ -1231,7 +1231,17 @@ usb_start.sh = {
 
 /sbin/mkdosfs=mkdosfs
 
-/etc/wpa_supplicant.conf=../install/etc/wpa_supplicant.conf
+[perms=644] /etc/wpa_supplicant.conf={
+ctrl_interface=/var/run/wpa_supplicant
+eapol_version=1
+ap_scan=1
+fast_reauth=1
+network={
+    ssid="ITI_Students"
+    key_mgmt=WPA-PSK
+    psk="ITI_2@24"
+}
+}
 
 [perms=644] /etc/io-sock.conf={
 hw.dhdsdio.dev0="rpi5"
