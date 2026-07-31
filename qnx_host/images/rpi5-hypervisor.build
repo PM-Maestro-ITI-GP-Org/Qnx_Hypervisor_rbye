@@ -117,10 +117,12 @@
     io-sock -m phy -m fdt -d cgem -m pci -d em -d ix -d re -d igc -m usb -d axe -d axge -d cdce -d smsc -m vdevpeer-net -m filter -o config=/etc/io-sock.conf -d qwdi_dhd_sdio-2_11-rpi5 &
     sleep 2
 
+    echo "=== NET: running vdev_net_start..."
     ############################################################################################
     ## vdev net start (creates vp0/vp1 for guests)
     ############################################################################################
     /proc/boot/.vdev_net_start.sh
+    echo "=== NET: vdev done, configuring bridge..."
 
     ############################################################################################
     ## network conf
@@ -131,6 +133,11 @@
     # enable routing
     display_msg "Enabling routing ..."
     sysctl -w net.inet.ip.forwarding=1
+
+    # Enable pf and load NAT + filter rules for guest internet access
+    pfctl -e
+    pfctl -R -f /etc/pf-rules.conf
+    pfctl -N -f /etc/pf-nat.conf
 
     ############################################################################################
     ## SSH daemon
@@ -187,30 +194,41 @@
 ## Script for Virtual Network driver
 ############################################################################################
 [perms=0744] .vdev_net_start.sh = {
-   #!/bin/sh   
-  waitfor /dev/io-sock/mods-vdevpeer-net.so
-
-  ## Guest-to-host direct link — standalone IP, NOT in bridge
+   #!/bin/sh
+  echo "=== vdev: waiting for io-sock module..."
+  waitfor /dev/io-sock/mods-vdevpeer-net.so 30
+  echo "=== vdev: module ready, creating vp0/vp1..."
+  echo "=== vdev: ifconfig vp0 create..."
   ifconfig vp0 create
+  echo "=== vdev: vpctl bind vp0..."
   vpctl vp0 peer=/dev/qvm/qnx-guest-1/guest_to_host bind=/dev/vdevpeers/vp0
+  echo "=== vdev: ifconfig vp0 10.0.0.1..."
   ifconfig vp0 10.0.0.1 netmask 255.255.255.0 up
   ifconfig vp0 -txcsum -txcsum6 -tso4 -tso6
 
+  echo "=== vdev: ifconfig vp1 create..."
   ifconfig vp1 create
+  echo "=== vdev: vpctl bind vp1..."
   vpctl vp1 peer=/dev/qvm/linux-guest/guest_to_host bind=/dev/vdevpeers/vp1
+  echo "=== vdev: ifconfig vp1 10.0.1.1..."
   ifconfig vp1 10.0.1.1 netmask 255.255.255.0 up
   ifconfig vp1 -txcsum -txcsum6 -tso4 -tso6
-  
 
+  echo "=== vdev: if_up cgem0..."
   ## Physical NIC — bring up for bridge (external LAN only, vp0 stays OUT)
   if_up -p cgem0
+  echo "=== vdev: ifconfig cgem0 up..."
   ifconfig cgem0 up
+  echo "=== vdev: sysctl bridge..."
   sysctl -w net.link.bridge.inherit_mac=1
+  echo "=== vdev: bridge0 addm cgem0..."
   ifconfig bridge0 create up addm cgem0
+  echo "=== vdev: done"
 }
 
 [perms=0744] .wifi_start.sh = {
-   #!/bin/sh
+  #!/bin/sh
+  echo "=== WiFi: waiting for bcm0 interface... ==="
 
   ## Poll for bcm0 to appear (up to 10 s, 500 ms intervals)
   i=0
@@ -220,39 +238,11 @@
       i=$((i+1))
   done
   ifconfig bcm0 up
-
-  ## Ensure ctrl_interface directory exists (rootfs is mounted by now)
   mkdir -p /var/run/wpa_supplicant
 
-  ## wpa_supplicant retry: poll for association every 1 s, up to 6 s per attempt,
-  ## 3 attempts total.  Exits as soon as the link is up.
-  n=0
-  while [ $n -lt 3 ]; do
-      /usr/sbin/wpa_supplicant -t -D qwdi -i bcm0 -c /etc/wpa_supplicant.conf &
-      i=0
-      while [ $i -lt 6 ]; do
-          /usr/sbin/wpa_cli -i bcm0 status 2>/dev/null | grep -q "wpa_state=COMPLETED" && break 2
-          sleep 1
-          i=$((i+1))
-      done
-      n=$((n+1))
-  done
-
-  dhcpcd -b bcm0
-
-  ## Wait for bcm0 to have an IP before touching pf/NAT (up to 15 s)
-  i=0
-  while [ $i -lt 15 ]; do
-      ifconfig bcm0 | grep -q "status: associated" && \
-      ifconfig bcm0 | grep -q "inet " && break
-      sleep 1
-      i=$((i+1))
-  done
-
-  ## Enable pf and load rules (split by type because combined -f is broken on this io-sock)
-  pfctl -e
-  pfctl -R -f /etc/pf.conf
-  pfctl -N -f /etc/pf.conf
+  echo "=== WiFi: starting wifi_service (auto-config daemon) ==="
+  /sbin/wifi_service >/dev/null 2>&1 &
+  echo "=== WiFi: wifi_service started ==="
 }
 
 [uid=0 gid=0]
@@ -1195,13 +1185,18 @@ usb_start.sh = {
 ################################################################################################
 ## WIFI firmware and WPA utilities
 ################################################################################################
-[search=../../src/wifi/firmware] /etc/wifi/firmware/brcmfmac43455-sdio.raspberrypi,5-model-b.bin=brcmfmac43455-sdio.raspberrypi,5-model-b.bin
-[search=../../src/wifi/firmware] /etc/wifi/firmware/brcmfmac43455-sdio.raspberrypi,5-model-b.clm_blob=brcmfmac43455-sdio.raspberrypi,5-model-b.clm_blob
-[search=../../src/wifi/firmware] /etc/wifi/firmware/brcmfmac43455-sdio.raspberrypi,5-model-b.txt=brcmfmac43455-sdio.raspberrypi,5-model-b.txt
+[search=../../src/wifi/wifi_firmware] /etc/wifi/firmware/brcmfmac43455-sdio.raspberrypi,5-model-b.bin=brcmfmac43455-sdio.raspberrypi,5-model-b.binary
+[search=../../src/wifi/wifi_firmware] /etc/wifi/firmware/brcmfmac43455-sdio.raspberrypi,5-model-b.clm_blob=brcmfmac43455-sdio.raspberrypi,5-model-b.clm_blob
+[search=../../src/wifi/wifi_firmware] /etc/wifi/firmware/brcmfmac43455-sdio.raspberrypi,5-model-b.txt=brcmfmac43455-sdio.raspberrypi,5-model-b.txt
 /usr/sbin/wpa_cli=wpa_cli-2.11
 /usr/sbin/wpa_passphrase=wpa_passphrase-2.11
 [search=../../qnx800/target/qnx/${PROCESSOR}/usr/sbin] /usr/sbin/wpa_supplicant=wpa_supplicant-2.11
 [search=../../qnx800/target/qnx/${PROCESSOR}/usr/lib] /usr/lib/libwpactrl-2.11.so.1=libwpactrl-2.11.so.1
+
+## WiFi auto-config daemon and config files
+[search=../../src/wifi/wifi_service] /sbin/wifi_service=wifi_service
+[search=../../src/wifi/wifi_conf] /etc/wifi/wpa_supplicant_default.conf=wpa_supplicant_default.conf
+[search=../../src/wifi/wifi_conf] /etc/wifi/wpa_supplicant_real.conf=wpa_supplicant_real.conf
 
 #[perms=0555] /etc/wpa_act={
 #!/bin/sh
@@ -1231,18 +1226,6 @@ usb_start.sh = {
 
 /sbin/mkdosfs=mkdosfs
 
-[perms=644] /etc/wpa_supplicant.conf={
-ctrl_interface=/var/run/wpa_supplicant
-eapol_version=1
-ap_scan=1
-fast_reauth=1
-network={
-    ssid="ITI_Students"
-    key_mgmt=WPA-PSK
-    psk="ITI_2@24"
-}
-}
-
 [perms=644] /etc/io-sock.conf={
 hw.dhdsdio.dev0="rpi5"
 dev.qwdi_wifi.conf="/etc/wifi/qwdi_wifi.conf"
@@ -1262,22 +1245,16 @@ qwdi_dbg_level=0
 }
 
 # routing file conf
-/etc/pf.conf={
-ext_if = "bcm0"          ## WiFi interface (guest internet via NAT)
-int_if = "vp0"           ## vdevpeer link to guest 1
-guest_net = "10.0.0.0/24"
+/etc/pf-nat.conf={
+nat on bcm0 inet from 10.0.0.0/24 to any -> (bcm0) round-robin
+}
 
-set skip on lo           ## loopback — always skip
-set skip on vp0          ## skip vdevpeer interfaces (pf breaks point-to-point links)
+/etc/pf-rules.conf={
+set skip on lo
+set skip on vp0
 set skip on vp1
-
-## NAT: translate guest traffic to bcm0's dynamic IP, round-robin source ports
-nat on $ext_if inet from $guest_net to any -> ($ext_if) round-robin
-
-## Outbound: allow guest pre-NAT + post-NAT traffic out through WiFi
-## (post-NAT source is bcm0's IP, so a plain pass is needed)
-pass out on $ext_if from $guest_net to any
-pass out on $ext_if
+pass out on bcm0 from 10.0.0.0/24 to any
+pass out on bcm0
 }
 
 
