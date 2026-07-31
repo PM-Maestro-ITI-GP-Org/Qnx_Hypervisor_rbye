@@ -24,7 +24,7 @@
 
 # Size in 512-byte disk sectors, must be a multiple of 8.
 # 1843200 * 512 = 900MB, against ~555MB of content — headroom for the Qt deploys to grow.
-[num_sectors=1843200]
+[num_sectors=4194304]
 
 # Inodes are pre-allocated at format time and cannot be added later. The two Qt deploy
 # trees are ~3000 files between them; 20000 leaves plenty of room.
@@ -73,6 +73,15 @@
 /usr/share/screen/graphics-virtio-virgl.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl.conf
 /usr/share/screen/graphics-virtio-virgl-modern.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl-modern.conf
 /usr/share/screen/graphics-virtio-virgl-virtual.conf=../../../src/oss_packages/qnx-screen-virtio-8.0.4-r1/usr/share/screen/graphics-virtio-virgl-virtual.conf
+
+
+################################################################################################
+## Mosquitto MQTT client library (for motor_recorder)
+##
+## motor_recorder uses libmosquitto for MQTT communication to the Qt GUI.
+## SONAME is libmosquitto.so.1, file is mapped at that name so ldqnx finds it.
+################################################################################################
+/usr/lib/libmosquitto.so.1=../../../src/mqtt_libs/install_qnx/lib/libmosquitto.so.2.1.2
 
 
 ################################################################################################
