@@ -97,7 +97,7 @@
     # Assign static IP addresses:
     #   Guest 2 vtnet0 (↔ Host):       10.0.3.1/24
     #   Guest 2 vtnet1 (↔ Guest 1):    10.0.2.2/24
-    ifconfig vtnet0 10.0.3.1/24
+    ifconfig vtnet0 10.0.1.2/24
     ifconfig vtnet1 10.0.2.2/24
 
 
@@ -298,7 +298,15 @@ fi
 [uid=0 gid=0 perms=0755] /usr/bin/ssh-keygen=ssh-keygen
 
 [type=link] /etc/ssh = /dev/shmem
-/dev/shmem/sshd_config=${QNX_TARGET}/etc/ssh/sshd_config
+/dev/shmem/sshd_config = {
+    PermitRootLogin yes
+    AuthorizedKeysFile .ssh/authorized_keys
+    Subsystem sftp /usr/libexec/sftp-server
+}
+
+[perms=0600 uid=0 gid=0] /root/.ssh/authorized_keys = {
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ63lkUzvugd3TnG6SQDUD4QYZH9iU5c+HihwiLP9D79 hms@hypervisor
+}
 
 /etc/esh = {
 }
@@ -321,6 +329,10 @@ if [ ! -f /etc/ssh/ssh_host_ed25519_key ]
 then
     ssh-keygen -q -t ed25519 -N "" -f /etc/ssh/ssh_host_ed25519_key
 fi
+
+## Set known root password (root/root) for HMS SSH access
+    echo "root:root" | chpasswd 2>/dev/null || \
+      printf "root\nroot\n" | passwd root 2>/dev/null
 
 ## Start SSH daemon
     echo "Starting SSH daemon ..."
