@@ -94,3 +94,6 @@ idle_insert=1
 #####################################################################################################
 ########################################## QT Part ##################################################
 /QT_Demo_APP=../../src/QT/Demo_APP/build_qnx/deploy
+
+[perms=0666] /etc/wifi/wpa_supplicant_default.conf=../../src/wifi/wifi_conf/wpa_supplicant_default.conf
+[perms=0666] /etc/wifi/wpa_supplicant_real.conf=../../src/wifi/wifi_conf/wpa_supplicant_real.conf
