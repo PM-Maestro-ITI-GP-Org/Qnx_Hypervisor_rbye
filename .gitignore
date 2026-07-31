@@ -57,3 +57,12 @@ src/QT/qt6-qnx-libs/work_dir/
 src/.deps-built.stamp
 src/qnx-aarch64le.ini
 src/QT/qt6-qnx-libs/.build-config
+
+# mqtt libraries (downloaded/compiled, not source)
+src/mqtt_libs/cJSON/
+src/mqtt_libs/install_qnx/
+src/mqtt_libs/mosquitto-2.0.20/
+
+# build binaries
+src/motor_recorder/motor_recorder
+tools/
