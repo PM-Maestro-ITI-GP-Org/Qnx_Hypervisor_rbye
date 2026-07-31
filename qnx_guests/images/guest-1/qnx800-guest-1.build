@@ -433,6 +433,7 @@ fi
 
 [perms=0600 uid=0 gid=0] /root/.ssh/authorized_keys = {
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ63lkUzvugd3TnG6SQDUD4QYZH9iU5c+HihwiLP9D79 hms@hypervisor
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA+xA4A9tvpQOgBiV7FWSxCLuAn/15Dtyq1HhCBC8xgo root@localhost
 }
 
 /etc/esh = {
