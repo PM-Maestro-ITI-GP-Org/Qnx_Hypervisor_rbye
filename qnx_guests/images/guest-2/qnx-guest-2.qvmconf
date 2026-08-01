@@ -7,8 +7,8 @@ system guest_2
 ram 0x80000000,512M
 
 # Add a 'cpu' for each virtual CPU that the guest will have
-#cpu
 cpu
+cpu sched 20r
 
 # Use 'runmask' after 'cpu' entries to fix the virtual CPUs to host physical CPUs
 #runmask 0

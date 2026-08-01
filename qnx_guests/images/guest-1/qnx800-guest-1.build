@@ -8,7 +8,7 @@
 [+keeplinked]
 [image=0x80000000]
 [virtual=aarch64le,elf ] boot = {
-    startup-armv8_fm -H
+    ../../../src/hardware/startup/boards/armv8_fm/aarch64/le/startup-armv8_fm -H -P2
     PATH=/proc/boot:/sbin:/bin:/usr/bin:/usr/sbin:/usr/libexec LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib:/lib/dll:/lib/dll/pci:/proc/boot/lib procnto-smp-instr -v
 }
 

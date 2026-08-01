@@ -241,7 +241,7 @@ static unsigned use_memory_mapped_callouts = 0;
  GICR offset shift value
 
 */
-static paddr_t gicd_paddr_base = NULL_PADDR;
+paddr_t gicd_paddr_base = NULL_PADDR;
 static paddr_t gicr_paddr_base = NULL_PADDR;
 static paddr_t gicc_paddr_base = NULL_PADDR;
 static unsigned gicr_offset_shift_val = 0;

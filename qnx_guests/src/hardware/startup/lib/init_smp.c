@@ -35,6 +35,10 @@ output_callout_t	*smp_prev_output_rtn;
 extern struct callout_rtn	smp_spin;
 extern void 				smp_start(void);
 
+#if defined(__aarch64__)
+extern paddr_t gicd_paddr_base;
+#endif
+
 
 static void
 transfer_aps(void) {
@@ -73,6 +77,11 @@ start_aps(void) {
 			count = 0;
 			do {
 				if(++count == 0) ap_fail(i);
+#if defined(__aarch64__)
+				/* [Patched] periodic trapped MMIO read: yields to qvm so it can
+				 * schedule the just-powered-on vCPU1 */
+				if ((count & 0xFF) == 0) (void)in32(gicd_paddr_base + 0x8);
+#endif
 			} while(cpu_starting != 0);
 		} else {
 			ap_fail(i);

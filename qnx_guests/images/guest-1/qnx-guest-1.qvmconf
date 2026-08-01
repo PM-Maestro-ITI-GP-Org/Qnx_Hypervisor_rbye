@@ -16,7 +16,10 @@ ram 0x80000000,2G
 
 # Add a 'cpu' for each virtual CPU that the guest will have
 cpu
-cpu
+cpu sched 20r
+
+# Generate FDT for the guest so it doesn't need to probe CPU/GIC topology
+fdt generate
 
 # This IFS is found in the images/ folder of the guest BSP.
 # Here, qvm will look for this IFS in your current working folder.
