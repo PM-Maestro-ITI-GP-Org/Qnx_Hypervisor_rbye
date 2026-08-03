@@ -267,7 +267,7 @@ void start_wpa_monitor(void)
 
 int get_gateway_ip(char *buf, size_t len)
 {
-    FILE *fp = popen("netstat -rn 2>/dev/null | grep 'default'", "r");
+    FILE *fp = popen("netstat -rn 2>/dev/null | grep 'default' | grep -v ':'", "r");
     if (!fp) return -1;
     char line[128];
     if (!fgets(line, sizeof(line), fp)) { pclose(fp); return -1; }
@@ -279,8 +279,12 @@ int get_gateway_ip(char *buf, size_t len)
     while (*p && *p == ' ') p++;
     if (!*p) return -1;
     char *gw = p;
-    while (*p && *p != ' ') p++;
+    while (*p && *p != ' ' && *p != '\n') p++;
     *p = '\0';
+    // Only accept IPv4-style gateways (digits and dots only)
+    for (char *q = gw; *q; q++) {
+        if ((*q < '0' || *q > '9') && *q != '.') return -1;
+    }
     snprintf(buf, len, "%s", gw);
     return 1;
 }
@@ -313,7 +317,12 @@ void *credential_receiver(void *arg)
         memset(&addr, 0, sizeof(addr));
         addr.sin_family = AF_INET;
         addr.sin_port = htons(PHONE_PORT);
-        inet_pton(AF_INET, phone_ip, &addr.sin_addr);
+        if (inet_pton(AF_INET, phone_ip, &addr.sin_addr) != 1) {
+            printf("[CRED] Invalid phone IP '%s', retrying...\n", phone_ip);
+            close(sock);
+            sleep_or_interrupted(1);
+            continue;
+        }
 
         if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
             close(sock);
