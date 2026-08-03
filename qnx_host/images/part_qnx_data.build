@@ -97,3 +97,7 @@ idle_insert=1
 
 [perms=0666] /etc/wifi/wpa_supplicant_default.conf=../../src/wifi/wifi_conf/wpa_supplicant_default.conf
 [perms=0666] /etc/wifi/wpa_supplicant_real.conf=../../src/wifi/wifi_conf/wpa_supplicant_real.conf
+
+#####################################################################################################
+######################################## MQTT Part ##################################################
+/usr/lib/libmosquitto.so.1=../../src/mqtt_libs/install_qnx/lib/libmosquitto.so.2.1.2
