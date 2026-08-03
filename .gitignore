@@ -5,6 +5,10 @@ src/someip/commonapi-qnx/build-rpi/
 src/someip/commonapi-qnx/third_party/
 src/someip/commonapi_client_server/client/build/
 src/someip/commonapi_client_server/server/build/
+src/Hypervisor_Management_System/build/
+
+# never commit private keys
+src/Hypervisor_Management_System/ssh/keys/hms_ssh_key
 
 # ignore host build output directories
 qnx_host/install/
