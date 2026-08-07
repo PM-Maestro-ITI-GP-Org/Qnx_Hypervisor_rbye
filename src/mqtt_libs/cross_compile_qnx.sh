@@ -3,12 +3,14 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 MOSQUITTO_VERSION="2.0.20"
-SOURCE_DIR="/media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/mqtt_libs/mosquitto-${MOSQUITTO_VERSION}"
-BUILD_DIR="/media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/mqtt_libs/build_qnx"
-INSTALL_DIR="/media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/mqtt_libs/install_qnx"
-QNX800_DIR="/media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/qnx800"
-CJSON_DIR="/media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/mqtt_libs/cJSON"
+SOURCE_DIR="${SCRIPT_DIR}/mosquitto-${MOSQUITTO_VERSION}"
+BUILD_DIR="${SCRIPT_DIR}/build_qnx"
+INSTALL_DIR="${SCRIPT_DIR}/install_qnx"
+QNX800_DIR="${QNX800_DIR:-${SCRIPT_DIR}/../../qnx800}"
+CJSON_DIR="${SCRIPT_DIR}/cJSON"
 
 echo "=========================================="
 echo "Mosquitto Cross-Compilation for QNX"

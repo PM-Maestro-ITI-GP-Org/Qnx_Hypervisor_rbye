@@ -5,7 +5,7 @@
 ### Step 1: Download Mosquitto Source
 
 ```bash
-cd /media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/mqtt_libs
+cd /path/to/mqtt_libs
 ./download_mosquitto.sh
 ```
 
@@ -13,6 +13,12 @@ cd /media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/mqtt_libs
 
 ```bash
 ./cross_compile_qnx.sh
+```
+
+Or run both targets from the Makefile:
+
+```bash
+make install   # download + compile
 ```
 
 This will:

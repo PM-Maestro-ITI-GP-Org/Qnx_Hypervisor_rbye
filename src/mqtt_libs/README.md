@@ -4,9 +4,10 @@ This directory contains scripts to download and cross-compile mosquitto MQTT lib
 
 ## Quick Start
 
+All paths in the scripts are relative to this directory, so it can live/move anywhere.
+
 1. **Download mosquitto source**:
    ```bash
-   cd /media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/mqtt_libs
    ./download_mosquitto.sh
    ```
 
@@ -14,6 +15,14 @@ This directory contains scripts to download and cross-compile mosquitto MQTT lib
    ```bash
    ./cross_compile_qnx.sh
    ```
+
+Or run both from the Makefile:
+
+```bash
+make download      # download source only
+make compile       # cross-compile only
+make install       # download + compile (default)
+```
 
 ## How It Works
 

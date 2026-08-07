@@ -1,9 +1,11 @@
 #!/bin/bash
 # Download mosquitto source code
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 MOSQUITTO_VERSION="2.0.20"
-SOURCE_DIR="/media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/mqtt_libs/mosquitto-${MOSQUITTO_VERSION}"
-DOWNLOAD_DIR="/media/gemy/Extra/ITI_GP/Qnx_Hypervisor_rbye/src/mqtt_libs"
+SOURCE_DIR="${SCRIPT_DIR}/mosquitto-${MOSQUITTO_VERSION}"
+DOWNLOAD_DIR="${SCRIPT_DIR}"
 
 echo "Creating download directory: $DOWNLOAD_DIR"
 mkdir -p "$DOWNLOAD_DIR"
