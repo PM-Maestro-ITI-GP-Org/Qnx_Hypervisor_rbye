@@ -1165,7 +1165,7 @@ usb_start.sh = {
 /bin/gpio-aon-bcm=gpio-aon-bcm
 /bin/gpio-bcm=gpio-bcm
 /bin/gpio-rp1=gpio-rp1
-/sbin/rpi-gpio=../../src/rpi-gpio/build-qnx/rpi_gpio
+/sbin/rpi-gpio=../../src/rpi-gpio/build/resmgr/rpi_gpio
 
 ################################################################################################
 ## Mailbox utility
